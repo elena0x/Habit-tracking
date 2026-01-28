@@ -1,11 +1,13 @@
 import { useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, TrendingUp, Calendar, Clock, FileText } from 'lucide-react';
-import { format, parseISO, startOfMonth, endOfMonth, eachDayOfInterval, subMonths } from 'date-fns';
+import { ArrowLeft, TrendingUp, Calendar, Clock, FileText, Pencil } from 'lucide-react';
+import { format, parseISO, startOfMonth, eachDayOfInterval, subMonths } from 'date-fns';
 import { zhCN } from 'date-fns/locale';
 import { useEvents } from '@/hooks/useEvents';
 import { useRecords } from '@/hooks/useRecords';
+import { EditEventSheet } from '@/components/EditEventSheet';
 import { cn } from '@/lib/utils';
+import type { EventType } from '@/types';
 
 const colorClasses: { [key: string]: { bg: string; iconBg: string; accent: string } } = {
   amber: { bg: 'bg-amber-50', iconBg: 'bg-amber-100', accent: 'bg-amber-500' },
@@ -19,11 +21,16 @@ const colorClasses: { [key: string]: { bg: string; iconBg: string; accent: strin
 const EventDetailPage = () => {
   const { eventId } = useParams<{ eventId: string }>();
   const navigate = useNavigate();
-  const { getEventById } = useEvents();
+  const { getEventById, updateEvent } = useEvents();
   const { records, getRecordsByEvent } = useRecords();
+  const [editSheetOpen, setEditSheetOpen] = useState(false);
 
   const event = eventId ? getEventById(eventId) : null;
   const eventRecords = eventId ? getRecordsByEvent(eventId) : [];
+
+  const handleUpdateEvent = (id: string, data: { name: string; type: EventType; icon: string; color: string }) => {
+    updateEvent(id, data);
+  };
 
   // Sort records by date (newest first)
   const sortedRecords = useMemo(() => {
@@ -97,6 +104,12 @@ const EventDetailPage = () => {
             <ArrowLeft className="w-5 h-5" />
           </button>
           <h1 className="text-xl font-semibold flex-1">事件详情</h1>
+          <button 
+            onClick={() => setEditSheetOpen(true)}
+            className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-muted"
+          >
+            <Pencil className="w-5 h-5 text-muted-foreground" />
+          </button>
         </div>
       </header>
 
@@ -222,6 +235,14 @@ const EventDetailPage = () => {
           )}
         </div>
       </main>
+
+      {/* Edit Event Sheet */}
+      <EditEventSheet
+        open={editSheetOpen}
+        onOpenChange={setEditSheetOpen}
+        event={event}
+        onSubmit={handleUpdateEvent}
+      />
     </div>
   );
 };
