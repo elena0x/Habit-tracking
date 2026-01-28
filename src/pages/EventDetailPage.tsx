@@ -1,0 +1,229 @@
+import { useState, useMemo } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { ArrowLeft, TrendingUp, Calendar, Clock, FileText } from 'lucide-react';
+import { format, parseISO, startOfMonth, endOfMonth, eachDayOfInterval, subMonths } from 'date-fns';
+import { zhCN } from 'date-fns/locale';
+import { useEvents } from '@/hooks/useEvents';
+import { useRecords } from '@/hooks/useRecords';
+import { cn } from '@/lib/utils';
+
+const colorClasses: { [key: string]: { bg: string; iconBg: string; accent: string } } = {
+  amber: { bg: 'bg-amber-50', iconBg: 'bg-amber-100', accent: 'bg-amber-500' },
+  rose: { bg: 'bg-rose-50', iconBg: 'bg-rose-100', accent: 'bg-rose-500' },
+  emerald: { bg: 'bg-emerald-50', iconBg: 'bg-emerald-100', accent: 'bg-emerald-500' },
+  sky: { bg: 'bg-sky-50', iconBg: 'bg-sky-100', accent: 'bg-sky-500' },
+  violet: { bg: 'bg-violet-50', iconBg: 'bg-violet-100', accent: 'bg-violet-500' },
+  orange: { bg: 'bg-orange-50', iconBg: 'bg-orange-100', accent: 'bg-orange-500' },
+};
+
+const EventDetailPage = () => {
+  const { eventId } = useParams<{ eventId: string }>();
+  const navigate = useNavigate();
+  const { getEventById } = useEvents();
+  const { records, getRecordsByEvent } = useRecords();
+
+  const event = eventId ? getEventById(eventId) : null;
+  const eventRecords = eventId ? getRecordsByEvent(eventId) : [];
+
+  // Sort records by date (newest first)
+  const sortedRecords = useMemo(() => {
+    return [...eventRecords].sort((a, b) => 
+      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
+  }, [eventRecords]);
+
+  // Calculate statistics
+  const stats = useMemo(() => {
+    if (eventRecords.length === 0) {
+      return { total: 0, thisMonth: 0, activeDays: 0, avgPerWeek: 0 };
+    }
+
+    const now = new Date();
+    const currentMonth = format(now, 'yyyy-MM');
+    const thisMonthRecords = eventRecords.filter(r => r.date.startsWith(currentMonth));
+    const uniqueDays = new Set(eventRecords.map(r => r.date));
+    
+    // Calculate average per week (last 4 weeks)
+    const fourWeeksAgo = subMonths(now, 1);
+    const recentRecords = eventRecords.filter(r => parseISO(r.date) >= fourWeeksAgo);
+    const avgPerWeek = Math.round((recentRecords.length / 4) * 10) / 10;
+
+    return {
+      total: eventRecords.length,
+      thisMonth: thisMonthRecords.length,
+      activeDays: uniqueDays.size,
+      avgPerWeek,
+    };
+  }, [eventRecords]);
+
+  // Generate heatmap data for last 3 months
+  const heatmapData = useMemo(() => {
+    const now = new Date();
+    const threeMonthsAgo = subMonths(startOfMonth(now), 2);
+    const days = eachDayOfInterval({ start: threeMonthsAgo, end: now });
+    
+    const recordCountByDate: { [key: string]: number } = {};
+    eventRecords.forEach(record => {
+      recordCountByDate[record.date] = (recordCountByDate[record.date] || 0) + 1;
+    });
+
+    return days.map(day => ({
+      date: format(day, 'yyyy-MM-dd'),
+      count: recordCountByDate[format(day, 'yyyy-MM-dd')] || 0,
+    }));
+  }, [eventRecords]);
+
+  const maxCount = Math.max(...heatmapData.map(d => d.count), 1);
+
+  if (!event) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <p className="text-muted-foreground">事件不存在</p>
+      </div>
+    );
+  }
+
+  const colors = colorClasses[event.color || 'amber'] || colorClasses.amber;
+
+  return (
+    <div className="min-h-screen bg-background pb-8">
+      {/* Header */}
+      <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-lg border-b border-border/50">
+        <div className="max-w-lg mx-auto px-5 py-4 flex items-center gap-3">
+          <button 
+            onClick={() => navigate(-1)}
+            className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-muted"
+          >
+            <ArrowLeft className="w-5 h-5" />
+          </button>
+          <h1 className="text-xl font-semibold flex-1">事件详情</h1>
+        </div>
+      </header>
+
+      <main className="max-w-lg mx-auto px-5 py-6 space-y-6">
+        {/* Event Header Card */}
+        <div className={cn('rounded-2xl p-6', colors.bg)}>
+          <div className="flex items-center gap-4">
+            <div className={cn('w-16 h-16 rounded-2xl flex items-center justify-center', colors.iconBg)}>
+              <span className="text-3xl">{event.icon}</span>
+            </div>
+            <div className="flex-1">
+              <h2 className="text-xl font-semibold">{event.name}</h2>
+              <p className="text-sm text-muted-foreground mt-1">
+                {event.type === 'once' && '一次性事件'}
+                {event.type === 'daily' && '日常打卡'}
+                {event.type === 'log' && '内容记录'}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Stats Grid */}
+        <div className="grid grid-cols-2 gap-3">
+          <div className="bg-muted/30 rounded-2xl p-4">
+            <div className="flex items-center gap-2 text-muted-foreground mb-2">
+              <TrendingUp className="w-4 h-4" />
+              <span className="text-xs">总记录</span>
+            </div>
+            <p className="text-2xl font-semibold">{stats.total}</p>
+          </div>
+          <div className="bg-muted/30 rounded-2xl p-4">
+            <div className="flex items-center gap-2 text-muted-foreground mb-2">
+              <Calendar className="w-4 h-4" />
+              <span className="text-xs">本月</span>
+            </div>
+            <p className="text-2xl font-semibold">{stats.thisMonth}</p>
+          </div>
+          <div className="bg-muted/30 rounded-2xl p-4">
+            <div className="flex items-center gap-2 text-muted-foreground mb-2">
+              <Clock className="w-4 h-4" />
+              <span className="text-xs">活跃天数</span>
+            </div>
+            <p className="text-2xl font-semibold">{stats.activeDays}</p>
+          </div>
+          <div className="bg-muted/30 rounded-2xl p-4">
+            <div className="flex items-center gap-2 text-muted-foreground mb-2">
+              <TrendingUp className="w-4 h-4" />
+              <span className="text-xs">周均</span>
+            </div>
+            <p className="text-2xl font-semibold">{stats.avgPerWeek}</p>
+          </div>
+        </div>
+
+        {/* Mini Heatmap */}
+        <div className="bg-muted/30 rounded-2xl p-4">
+          <h3 className="text-sm font-medium mb-3">活动热力图</h3>
+          <div className="flex flex-wrap gap-1">
+            {heatmapData.slice(-42).map((day, index) => {
+              const opacity = day.count === 0 ? 0.1 : 0.3 + (day.count / maxCount) * 0.7;
+              return (
+                <div
+                  key={index}
+                  className={cn('w-4 h-4 rounded-sm', colors.accent)}
+                  style={{ opacity }}
+                  title={`${day.date}: ${day.count}次`}
+                />
+              );
+            })}
+          </div>
+          <p className="text-xs text-muted-foreground mt-2">最近6周</p>
+        </div>
+
+        {/* Records Timeline */}
+        <div className="bg-muted/30 rounded-2xl p-4">
+          <h3 className="text-sm font-medium mb-4 flex items-center gap-2">
+            <FileText className="w-4 h-4" />
+            历史记录
+          </h3>
+          
+          {sortedRecords.length === 0 ? (
+            <p className="text-sm text-muted-foreground text-center py-4">
+              还没有记录
+            </p>
+          ) : (
+            <div className="relative pl-6 space-y-4 max-h-[400px] overflow-y-auto">
+              {/* Timeline Line */}
+              <div className="absolute left-2 top-0 bottom-0 w-px bg-border" />
+              
+              {sortedRecords.slice(0, 50).map((record) => {
+                const recordDate = parseISO(record.date);
+                const displayDate = format(recordDate, 'MM月dd日', { locale: zhCN });
+                const weekDay = format(recordDate, 'EEEE', { locale: zhCN });
+                
+                return (
+                  <div key={record.id} className="relative">
+                    {/* Timeline Dot */}
+                    <div className={cn(
+                      'absolute -left-4 top-1 w-2.5 h-2.5 rounded-full border-2 border-background',
+                      colors.accent
+                    )} />
+                    
+                    <div className="bg-background rounded-xl p-3">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-sm font-medium">{displayDate} {weekDay}</span>
+                        <span className="text-xs text-muted-foreground">{record.time || '--:--'}</span>
+                      </div>
+                      {record.note && (
+                        <p className="text-sm text-muted-foreground mt-1 whitespace-pre-wrap">
+                          {record.note}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+              
+              {sortedRecords.length > 50 && (
+                <p className="text-xs text-muted-foreground text-center py-2">
+                  仅显示最近50条记录
+                </p>
+              )}
+            </div>
+          )}
+        </div>
+      </main>
+    </div>
+  );
+};
+
+export default EventDetailPage;

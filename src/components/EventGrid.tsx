@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import { Zap, Plus, Trash2 } from 'lucide-react';
+import { Zap, Plus, Trash2, ChevronRight } from 'lucide-react';
 import type { Event, EventRecord } from '@/types';
 import { formatRelativeTime } from '@/lib/dateUtils';
 import {
@@ -42,6 +43,7 @@ const iconBgClasses: { [key: string]: string } = {
 const LONG_PRESS_DURATION = 500; // ms
 
 export const EventGrid = ({ events, getLastRecord, onQuickRecord, onDeleteEvent }: EventGridProps) => {
+  const navigate = useNavigate();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [eventToDelete, setEventToDelete] = useState<Event | null>(null);
   const longPressTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -67,12 +69,17 @@ export const EventGrid = ({ events, getLastRecord, onQuickRecord, onDeleteEvent 
     }
   }, []);
 
-  const handleClick = useCallback((eventId: string) => {
-    // Only trigger quick record if it wasn't a long press
+  const handleCardClick = useCallback((eventId: string) => {
+    // Only navigate if it wasn't a long press
     if (!isLongPressRef.current) {
-      onQuickRecord(eventId);
+      navigate(`/event/${eventId}`);
     }
     isLongPressRef.current = false;
+  }, [navigate]);
+
+  const handleQuickRecordClick = useCallback((e: React.MouseEvent, eventId: string) => {
+    e.stopPropagation();
+    onQuickRecord(eventId);
   }, [onQuickRecord]);
 
   const handleConfirmDelete = useCallback(() => {
@@ -97,9 +104,9 @@ export const EventGrid = ({ events, getLastRecord, onQuickRecord, onDeleteEvent 
           const iconBgClass = iconBgClasses[event.color || 'sky'] || iconBgClasses.sky;
           
           return (
-            <button
+            <div
               key={event.id}
-              onClick={() => handleClick(event.id)}
+              onClick={() => handleCardClick(event.id)}
               onTouchStart={() => handleTouchStart(event)}
               onTouchEnd={handleTouchEnd}
               onTouchCancel={handleTouchEnd}
@@ -112,7 +119,7 @@ export const EventGrid = ({ events, getLastRecord, onQuickRecord, onDeleteEvent 
                 setDeleteDialogOpen(true);
               }}
               className={cn(
-                'relative p-4 rounded-2xl border transition-all duration-200',
+                'relative p-4 rounded-2xl border transition-all duration-200 cursor-pointer',
                 'flex flex-col text-left min-h-[120px]',
                 'active:scale-[0.98] hover:shadow-card select-none',
                 colorClass
@@ -136,15 +143,18 @@ export const EventGrid = ({ events, getLastRecord, onQuickRecord, onDeleteEvent 
                 上次：{lastRecord ? formatRelativeTime(lastRecord.createdAt) : '–'}
               </p>
               
-              {/* Quick Action Button */}
-              <div className="absolute top-3 right-3 w-7 h-7 rounded-full bg-background/60 flex items-center justify-center">
+              {/* Quick Action Button - triggers record instead of navigation */}
+              <button
+                onClick={(e) => handleQuickRecordClick(e, event.id)}
+                className="absolute top-3 right-3 w-8 h-8 rounded-full bg-background/80 hover:bg-background flex items-center justify-center transition-colors"
+              >
                 {event.type === 'daily' ? (
-                  <Zap className="w-4 h-4 text-muted-foreground" />
+                  <Zap className="w-4 h-4 text-primary" />
                 ) : (
-                  <Plus className="w-4 h-4 text-muted-foreground" />
+                  <Plus className="w-4 h-4 text-primary" />
                 )}
-              </div>
-            </button>
+              </button>
+            </div>
           );
         })}
       </div>
