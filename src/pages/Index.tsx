@@ -10,6 +10,7 @@ import { BottomNav } from '@/components/BottomNav';
 import { FloatingAddButton } from '@/components/FloatingAddButton';
 import { EmptyState } from '@/components/EmptyState';
 import { RecordToast } from '@/components/RecordToast';
+import { NoteInputDialog } from '@/components/NoteInputDialog';
 import Settings from '@/pages/Settings';
 import type { Event, EventType } from '@/types';
 import { getCurrentDate } from '@/lib/dateUtils';
@@ -22,12 +23,30 @@ const Index = () => {
   const [createSheetOpen, setCreateSheetOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState<string>(getCurrentDate());
   const [toastEvent, setToastEvent] = useState<Event | null>(null);
+  const [noteDialogOpen, setNoteDialogOpen] = useState(false);
+  const [noteDialogEvent, setNoteDialogEvent] = useState<Event | null>(null);
 
   const { events, addEvent, deleteEvent, getEventById } = useEvents();
   const { records, addRecord, getLastRecordForEvent, getRecordsByDate } = useRecords();
 
   const handleQuickRecord = useCallback((eventId: string) => {
+    const event = getEventById(eventId);
+    if (!event) return;
+    
+    // For log type events, show note input dialog
+    if (event.type === 'log') {
+      setNoteDialogEvent(event);
+      setNoteDialogOpen(true);
+      return;
+    }
+    
+    // For other types, record immediately
     addRecord(eventId);
+    setToastEvent(event);
+  }, [addRecord, getEventById]);
+
+  const handleNoteConfirm = useCallback((eventId: string, note: string) => {
+    addRecord(eventId, { note: note || undefined });
     const event = getEventById(eventId);
     if (event) {
       setToastEvent(event);
@@ -137,6 +156,14 @@ const Index = () => {
 
       {/* Record Toast */}
       <RecordToast event={toastEvent} onHide={() => setToastEvent(null)} />
+
+      {/* Note Input Dialog for log type events */}
+      <NoteInputDialog
+        open={noteDialogOpen}
+        onOpenChange={setNoteDialogOpen}
+        event={noteDialogEvent}
+        onConfirm={handleNoteConfirm}
+      />
     </div>
   );
 };
