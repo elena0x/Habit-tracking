@@ -89,38 +89,44 @@ export const CalendarView = ({ records, events, onDateSelect, selectedDate }: Ca
           const isSelected = selectedDate === dateStr;
           const isToday = isTodayDate(day);
           
-          // Get unique event colors for this day
-          const eventColors = [...new Set(dayRecords.map(r => getEventColor(r.eventId)))].slice(0, 3);
+          // Get unique event names for this day (show up to 2)
+          const eventNames = [...new Set(dayRecords.map(r => {
+            const event = events.find(e => e.id === r.eventId);
+            return event?.name || '';
+          }))].filter(Boolean).slice(0, 2);
 
           return (
             <button
               key={dateStr}
               onClick={() => onDateSelect(dateStr)}
               className={cn(
-                'aspect-square rounded-xl flex flex-col items-center justify-center transition-all p-1',
+                'aspect-square rounded-xl flex flex-col items-center justify-center transition-all p-1 relative',
                 isSelected && 'bg-primary text-primary-foreground',
                 !isSelected && hasRecords && 'bg-accent',
                 !isSelected && !hasRecords && 'hover:bg-muted/50',
-                isToday && !isSelected && 'ring-2 ring-primary/30'
               )}
             >
-              <span className={cn(
-                'text-sm',
-                isSelected ? 'font-medium' : 'text-foreground',
-                !hasRecords && !isSelected && 'text-muted-foreground'
-              )}>
-                {day.getDate()}
-              </span>
+              {/* Today indicator */}
+              {isToday && !isSelected ? (
+                <span className="w-8 h-8 rounded-full bg-foreground text-background flex items-center justify-center text-sm font-medium">
+                  今
+                </span>
+              ) : (
+                <span className={cn(
+                  'text-sm',
+                  isSelected ? 'font-medium' : 'text-foreground',
+                  !hasRecords && !isSelected && 'text-muted-foreground'
+                )}>
+                  {day.getDate()}
+                </span>
+              )}
               
-              {/* Event dots */}
-              {hasRecords && !isSelected && (
-                <div className="flex gap-0.5 mt-1">
-                  {eventColors.map((color, i) => (
-                    <div 
-                      key={i}
-                      className={cn('w-1.5 h-1.5 rounded-full', colorDotClasses[color] || colorDotClasses.amber)}
-                    />
-                  ))}
+              {/* Event name tags (only when not selected) */}
+              {hasRecords && !isSelected && eventNames.length > 0 && (
+                <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 whitespace-nowrap">
+                  <span className="text-[10px] text-primary font-medium px-1 py-0.5 bg-primary/10 rounded">
+                    {eventNames[0]}
+                  </span>
                 </div>
               )}
             </button>

@@ -1,19 +1,21 @@
 import { useState, useCallback } from 'react';
 import { useEvents } from '@/hooks/useEvents';
 import { useRecords } from '@/hooks/useRecords';
-import { EventCard } from '@/components/EventCard';
+import { EventGrid } from '@/components/EventGrid';
 import { CreateEventSheet } from '@/components/CreateEventSheet';
 import { CalendarView } from '@/components/CalendarView';
-import { DayRecordsList } from '@/components/DayRecordsList';
-import { StatsView } from '@/components/StatsView';
+import { TimelineRecords } from '@/components/TimelineRecords';
+import { EnhancedStatsView } from '@/components/EnhancedStatsView';
 import { BottomNav } from '@/components/BottomNav';
 import { FloatingAddButton } from '@/components/FloatingAddButton';
 import { EmptyState } from '@/components/EmptyState';
 import { RecordToast } from '@/components/RecordToast';
+import Settings from '@/pages/Settings';
 import type { Event, EventType } from '@/types';
 import { getCurrentDate } from '@/lib/dateUtils';
+import { Search, Bell, Plus } from 'lucide-react';
 
-type TabType = 'home' | 'calendar' | 'stats';
+type TabType = 'home' | 'calendar' | 'stats' | 'settings';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState<TabType>('home');
@@ -46,12 +48,29 @@ const Index = () => {
     <div className="min-h-screen bg-background pb-24">
       {/* Header */}
       <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-lg border-b border-border/50">
-        <div className="max-w-lg mx-auto px-5 py-4">
+        <div className="max-w-lg mx-auto px-5 py-4 flex items-center justify-between">
           <h1 className="text-xl font-semibold">
             {activeTab === 'home' && '我的生活'}
-            {activeTab === 'calendar' && '日历'}
+            {activeTab === 'calendar' && '查看'}
             {activeTab === 'stats' && '趋势'}
+            {activeTab === 'settings' && '设置'}
           </h1>
+          {activeTab === 'home' && (
+            <div className="flex items-center gap-3">
+              <button className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-muted">
+                <Search className="w-5 h-5 text-muted-foreground" />
+              </button>
+              <button className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-muted">
+                <Bell className="w-5 h-5 text-muted-foreground" />
+              </button>
+              <button 
+                onClick={() => setCreateSheetOpen(true)}
+                className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-muted"
+              >
+                <Plus className="w-5 h-5 text-muted-foreground" />
+              </button>
+            </div>
+          )}
         </div>
       </header>
 
@@ -63,16 +82,11 @@ const Index = () => {
             {events.length === 0 ? (
               <EmptyState onCreateFirst={() => setCreateSheetOpen(true)} />
             ) : (
-              <div className="space-y-3 animate-fade-in">
-                {events.map(event => (
-                  <EventCard
-                    key={event.id}
-                    event={event}
-                    lastRecord={getLastRecordForEvent(event.id)}
-                    onQuickRecord={() => handleQuickRecord(event.id)}
-                  />
-                ))}
-              </div>
+              <EventGrid
+                events={events}
+                getLastRecord={getLastRecordForEvent}
+                onQuickRecord={handleQuickRecord}
+              />
             )}
           </>
         )}
@@ -86,7 +100,7 @@ const Index = () => {
               onDateSelect={handleDateSelect}
               selectedDate={selectedDate}
             />
-            <DayRecordsList
+            <TimelineRecords
               date={selectedDate}
               records={selectedDateRecords}
               events={events}
@@ -96,7 +110,12 @@ const Index = () => {
 
         {/* Stats Tab */}
         {activeTab === 'stats' && (
-          <StatsView records={records} events={events} />
+          <EnhancedStatsView records={records} events={events} />
+        )}
+
+        {/* Settings Tab */}
+        {activeTab === 'settings' && (
+          <Settings />
         )}
       </main>
 
