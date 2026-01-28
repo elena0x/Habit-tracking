@@ -1,7 +1,8 @@
 import { useState, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import { Zap, Plus, Trash2, ChevronRight } from 'lucide-react';
+import { getColorClasses, hexToRgba } from '@/lib/colorUtils';
+import { Zap, Plus, Trash2 } from 'lucide-react';
 import type { Event, EventRecord } from '@/types';
 import { formatRelativeTime } from '@/lib/dateUtils';
 import {
@@ -22,7 +23,10 @@ interface EventGridProps {
   onDeleteEvent?: (eventId: string) => void;
 }
 
-const colorClasses: { [key: string]: string } = {
+const LONG_PRESS_DURATION = 500; // ms
+
+// Preset color classes for non-custom colors
+const presetColorClasses: { [key: string]: string } = {
   amber: 'bg-amber-50 border-amber-100',
   rose: 'bg-rose-50 border-rose-100',
   emerald: 'bg-emerald-50 border-emerald-100',
@@ -31,7 +35,7 @@ const colorClasses: { [key: string]: string } = {
   orange: 'bg-orange-50 border-orange-100',
 };
 
-const iconBgClasses: { [key: string]: string } = {
+const presetIconBgClasses: { [key: string]: string } = {
   amber: 'bg-amber-100',
   rose: 'bg-rose-100',
   emerald: 'bg-emerald-100',
@@ -39,8 +43,6 @@ const iconBgClasses: { [key: string]: string } = {
   violet: 'bg-violet-100',
   orange: 'bg-orange-100',
 };
-
-const LONG_PRESS_DURATION = 500; // ms
 
 export const EventGrid = ({ events, getLastRecord, onQuickRecord, onDeleteEvent }: EventGridProps) => {
   const navigate = useNavigate();
@@ -55,7 +57,6 @@ export const EventGrid = ({ events, getLastRecord, onQuickRecord, onDeleteEvent 
       isLongPressRef.current = true;
       setEventToDelete(event);
       setDeleteDialogOpen(true);
-      // Vibrate if available
       if (navigator.vibrate) {
         navigator.vibrate(50);
       }
@@ -70,7 +71,6 @@ export const EventGrid = ({ events, getLastRecord, onQuickRecord, onDeleteEvent 
   }, []);
 
   const handleCardClick = useCallback((eventId: string) => {
-    // Only navigate if it wasn't a long press
     if (!isLongPressRef.current) {
       navigate(`/event/${eventId}`);
     }
@@ -100,8 +100,25 @@ export const EventGrid = ({ events, getLastRecord, onQuickRecord, onDeleteEvent 
       <div className="grid grid-cols-2 gap-3 animate-fade-in">
         {events.map(event => {
           const lastRecord = getLastRecord(event.id);
-          const colorClass = colorClasses[event.color || 'sky'] || colorClasses.sky;
-          const iconBgClass = iconBgClasses[event.color || 'sky'] || iconBgClasses.sky;
+          const colorInfo = getColorClasses(event.color);
+          const isCustomColor = colorInfo.isCustom;
+          
+          // Use preset classes or custom styles
+          const cardClassName = isCustomColor 
+            ? '' 
+            : presetColorClasses[event.color || 'sky'] || presetColorClasses.sky;
+          const iconBgClassName = isCustomColor 
+            ? '' 
+            : presetIconBgClasses[event.color || 'sky'] || presetIconBgClasses.sky;
+          
+          const customCardStyle = isCustomColor ? {
+            backgroundColor: hexToRgba(colorInfo.hex, 0.1),
+            borderColor: hexToRgba(colorInfo.hex, 0.2),
+          } : undefined;
+          
+          const customIconBgStyle = isCustomColor ? {
+            backgroundColor: hexToRgba(colorInfo.hex, 0.2),
+          } : undefined;
           
           return (
             <div
@@ -122,14 +139,18 @@ export const EventGrid = ({ events, getLastRecord, onQuickRecord, onDeleteEvent 
                 'relative p-4 rounded-2xl border transition-all duration-200 cursor-pointer',
                 'flex flex-col text-left min-h-[120px]',
                 'active:scale-[0.98] hover:shadow-card select-none',
-                colorClass
+                cardClassName
               )}
+              style={customCardStyle}
             >
               {/* Icon */}
-              <div className={cn(
-                'w-10 h-10 rounded-xl flex items-center justify-center mb-3',
-                iconBgClass
-              )}>
+              <div 
+                className={cn(
+                  'w-10 h-10 rounded-xl flex items-center justify-center mb-3',
+                  iconBgClassName
+                )}
+                style={customIconBgStyle}
+              >
                 <span className="text-xl">{event.icon}</span>
               </div>
               
@@ -143,7 +164,7 @@ export const EventGrid = ({ events, getLastRecord, onQuickRecord, onDeleteEvent 
                 上次：{lastRecord ? formatRelativeTime(lastRecord.createdAt) : '–'}
               </p>
               
-              {/* Quick Action Button - triggers record instead of navigation */}
+              {/* Quick Action Button */}
               <button
                 onClick={(e) => handleQuickRecordClick(e, event.id)}
                 className="absolute top-3 right-3 w-8 h-8 rounded-full bg-background/80 hover:bg-background flex items-center justify-center transition-colors"

@@ -5,6 +5,7 @@ import {
 } from 'date-fns';
 import { zhCN } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
+import { getColorClasses, hexToRgba } from '@/lib/colorUtils';
 import { Check, Sun } from 'lucide-react';
 import type { Event, EventRecord } from '@/types';
 
@@ -17,27 +18,34 @@ interface HeatmapCardProps {
   timeRange: TimeRange;
 }
 
+// Preset color classes
+const presetColorClasses: { [key: string]: string } = {
+  amber: 'bg-amber-400',
+  rose: 'bg-rose-400',
+  emerald: 'bg-emerald-400',
+  sky: 'bg-sky-400',
+  violet: 'bg-violet-400',
+  orange: 'bg-orange-400',
+};
+
+const presetIconBgClasses: { [key: string]: string } = {
+  amber: 'bg-amber-100',
+  rose: 'bg-rose-100',
+  emerald: 'bg-emerald-100',
+  sky: 'bg-sky-100',
+  violet: 'bg-violet-100',
+  orange: 'bg-orange-100',
+};
+
 export const HeatmapCard = ({ event, records, currentDate, timeRange }: HeatmapCardProps) => {
-  const colorClasses: { [key: string]: string } = {
-    amber: 'bg-amber-400',
-    rose: 'bg-rose-400',
-    emerald: 'bg-emerald-400',
-    sky: 'bg-sky-400',
-    violet: 'bg-violet-400',
-    orange: 'bg-orange-400',
-  };
-
-  const iconBgClasses: { [key: string]: string } = {
-    amber: 'bg-amber-100',
-    rose: 'bg-rose-100',
-    emerald: 'bg-emerald-100',
-    sky: 'bg-sky-100',
-    violet: 'bg-violet-100',
-    orange: 'bg-orange-100',
-  };
-
-  const dotColor = colorClasses[event.color || 'sky'] || colorClasses.sky;
-  const iconBg = iconBgClasses[event.color || 'sky'] || iconBgClasses.sky;
+  const colorInfo = getColorClasses(event.color);
+  const isCustomColor = colorInfo.isCustom;
+  
+  const dotColor = isCustomColor ? '' : presetColorClasses[event.color || 'sky'] || presetColorClasses.sky;
+  const iconBg = isCustomColor ? '' : presetIconBgClasses[event.color || 'sky'] || presetIconBgClasses.sky;
+  
+  const customDotStyle = isCustomColor ? { backgroundColor: colorInfo.hex } : undefined;
+  const customIconBgStyle = isCustomColor ? { backgroundColor: hexToRgba(colorInfo.hex, 0.2) } : undefined;
 
   const recordDates = useMemo(() => {
     return new Set(records.map(r => r.date));
@@ -68,6 +76,7 @@ export const HeatmapCard = ({ event, records, currentDate, timeRange }: HeatmapC
                   'w-6 h-6 rounded-md flex items-center justify-center',
                   hasRecord ? dotColor : 'bg-muted/50'
                 )}
+                style={hasRecord ? customDotStyle : undefined}
               >
                 {hasRecord && <Check className="w-3 h-3 text-white" />}
               </div>
@@ -76,7 +85,7 @@ export const HeatmapCard = ({ event, records, currentDate, timeRange }: HeatmapC
         })}
       </div>
     );
-  }, [timeRange, currentDate, recordDates, dotColor]);
+  }, [timeRange, currentDate, recordDates, dotColor, customDotStyle]);
 
   // Month view - calendar grid
   const monthView = useMemo(() => {
@@ -103,6 +112,7 @@ export const HeatmapCard = ({ event, records, currentDate, timeRange }: HeatmapC
                 'aspect-square rounded-sm flex items-center justify-center',
                 hasRecord ? dotColor : 'bg-muted/50'
               )}
+              style={hasRecord ? customDotStyle : undefined}
             >
               {hasRecord && <Check className="w-2.5 h-2.5 text-white" />}
             </div>
@@ -110,7 +120,7 @@ export const HeatmapCard = ({ event, records, currentDate, timeRange }: HeatmapC
         })}
       </div>
     );
-  }, [timeRange, currentDate, recordDates, dotColor]);
+  }, [timeRange, currentDate, recordDates, dotColor, customDotStyle]);
 
   // Year view - 12 months
   const yearView = useMemo(() => {
@@ -138,12 +148,16 @@ export const HeatmapCard = ({ event, records, currentDate, timeRange }: HeatmapC
           const opacity = count === 0 ? 0.15 : 0.3 + (count / maxMonthRecords) * 0.7;
           const monthLabel = format(month, 'M月', { locale: zhCN });
           
+          const yearDotStyle = isCustomColor 
+            ? { backgroundColor: colorInfo.hex, opacity } 
+            : { opacity };
+          
           return (
             <div key={monthKey} className="flex flex-col items-center gap-1">
               <span className="text-[10px] text-muted-foreground">{monthLabel}</span>
               <div
                 className={cn('w-full h-5 rounded-md flex items-center justify-center', dotColor)}
-                style={{ opacity }}
+                style={yearDotStyle}
               >
                 {count > 0 && (
                   <span className="text-[10px] text-white font-medium">{count}</span>
@@ -154,13 +168,16 @@ export const HeatmapCard = ({ event, records, currentDate, timeRange }: HeatmapC
         })}
       </div>
     );
-  }, [timeRange, currentDate, records, dotColor]);
+  }, [timeRange, currentDate, records, dotColor, isCustomColor, colorInfo.hex]);
 
   return (
     <div className="bg-card rounded-2xl p-4 shadow-soft">
       {/* Header */}
       <div className="flex items-center gap-3 mb-4">
-        <div className={cn('w-8 h-8 rounded-lg flex items-center justify-center', iconBg)}>
+        <div 
+          className={cn('w-8 h-8 rounded-lg flex items-center justify-center', iconBg)}
+          style={customIconBgStyle}
+        >
           <span className="text-base">{event.icon}</span>
         </div>
         <span className="font-medium truncate">{event.name}</span>

@@ -7,9 +7,11 @@ import { useEvents } from '@/hooks/useEvents';
 import { useRecords } from '@/hooks/useRecords';
 import { EditEventSheet } from '@/components/EditEventSheet';
 import { cn } from '@/lib/utils';
+import { getColorClasses, hexToRgba } from '@/lib/colorUtils';
 import type { EventType } from '@/types';
 
-const colorClasses: { [key: string]: { bg: string; iconBg: string; accent: string } } = {
+// Preset color classes
+const presetColorClasses: { [key: string]: { bg: string; iconBg: string; accent: string } } = {
   amber: { bg: 'bg-amber-50', iconBg: 'bg-amber-100', accent: 'bg-amber-500' },
   rose: { bg: 'bg-rose-50', iconBg: 'bg-rose-100', accent: 'bg-rose-500' },
   emerald: { bg: 'bg-emerald-50', iconBg: 'bg-emerald-100', accent: 'bg-emerald-500' },
@@ -90,7 +92,14 @@ const EventDetailPage = () => {
     );
   }
 
-  const colors = colorClasses[event.color || 'amber'] || colorClasses.amber;
+  const colorInfo = getColorClasses(event.color);
+  const isCustomColor = colorInfo.isCustom;
+  const colors = presetColorClasses[event.color || 'amber'] || presetColorClasses.amber;
+  
+  // Custom color styles
+  const customBgStyle = isCustomColor ? { backgroundColor: hexToRgba(colorInfo.hex, 0.1) } : undefined;
+  const customIconBgStyle = isCustomColor ? { backgroundColor: hexToRgba(colorInfo.hex, 0.2) } : undefined;
+  const customAccentStyle = isCustomColor ? { backgroundColor: colorInfo.hex } : undefined;
 
   return (
     <div className="min-h-screen bg-background pb-8">
@@ -115,9 +124,15 @@ const EventDetailPage = () => {
 
       <main className="max-w-lg mx-auto px-5 py-6 space-y-6">
         {/* Event Header Card */}
-        <div className={cn('rounded-2xl p-6', colors.bg)}>
+        <div 
+          className={cn('rounded-2xl p-6', !isCustomColor && colors.bg)}
+          style={customBgStyle}
+        >
           <div className="flex items-center gap-4">
-            <div className={cn('w-16 h-16 rounded-2xl flex items-center justify-center', colors.iconBg)}>
+            <div 
+              className={cn('w-16 h-16 rounded-2xl flex items-center justify-center', !isCustomColor && colors.iconBg)}
+              style={customIconBgStyle}
+            >
               <span className="text-3xl">{event.icon}</span>
             </div>
             <div className="flex-1">
@@ -169,11 +184,14 @@ const EventDetailPage = () => {
           <div className="flex flex-wrap gap-1">
             {heatmapData.slice(-42).map((day, index) => {
               const opacity = day.count === 0 ? 0.1 : 0.3 + (day.count / maxCount) * 0.7;
+              const heatmapStyle = isCustomColor 
+                ? { backgroundColor: colorInfo.hex, opacity } 
+                : { opacity };
               return (
                 <div
                   key={index}
-                  className={cn('w-4 h-4 rounded-sm', colors.accent)}
-                  style={{ opacity }}
+                  className={cn('w-4 h-4 rounded-sm', !isCustomColor && colors.accent)}
+                  style={heatmapStyle}
                   title={`${day.date}: ${day.count}次`}
                 />
               );
@@ -206,10 +224,13 @@ const EventDetailPage = () => {
                 return (
                   <div key={record.id} className="relative">
                     {/* Timeline Dot */}
-                    <div className={cn(
-                      'absolute -left-4 top-1 w-2.5 h-2.5 rounded-full border-2 border-background',
-                      colors.accent
-                    )} />
+                    <div 
+                      className={cn(
+                        'absolute -left-4 top-1 w-2.5 h-2.5 rounded-full border-2 border-background',
+                        !isCustomColor && colors.accent
+                      )}
+                      style={customAccentStyle}
+                    />
                     
                     <div className="bg-background rounded-xl p-3">
                       <div className="flex items-center justify-between mb-1">
