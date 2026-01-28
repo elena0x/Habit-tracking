@@ -23,7 +23,7 @@ const Index = () => {
   const [selectedDate, setSelectedDate] = useState<string>(getCurrentDate());
   const [toastEvent, setToastEvent] = useState<Event | null>(null);
 
-  const { events, addEvent, getEventById } = useEvents();
+  const { events, addEvent, deleteEvent, getEventById } = useEvents();
   const { records, addRecord, getLastRecordForEvent, getRecordsByDate } = useRecords();
 
   const handleQuickRecord = useCallback((eventId: string) => {
@@ -86,6 +86,7 @@ const Index = () => {
                 events={events}
                 getLastRecord={getLastRecordForEvent}
                 onQuickRecord={handleQuickRecord}
+                onDeleteEvent={deleteEvent}
               />
             )}
           </>
