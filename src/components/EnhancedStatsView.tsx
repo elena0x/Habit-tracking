@@ -181,7 +181,10 @@ export const EnhancedStatsView = ({ records, events }: EnhancedStatsViewProps) =
           还没有任何事件
         </p>
       ) : (
-        <div className="grid grid-cols-2 gap-3">
+        <div className={cn(
+          'grid gap-3',
+          timeRange === 'month' ? 'grid-cols-2' : 'grid-cols-1'
+        )}>
           {events.map(event => (
             <HeatmapCard
               key={event.id}
