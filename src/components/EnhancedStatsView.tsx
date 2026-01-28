@@ -1,6 +1,11 @@
 import { useState, useMemo } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { addMonths, subMonths, format, startOfMonth, subDays } from 'date-fns';
+import { 
+  addMonths, subMonths, format, startOfMonth, subDays, addDays,
+  startOfWeek, endOfWeek, addWeeks, subWeeks,
+  startOfYear, endOfYear, addYears, subYears,
+  eachDayOfInterval, eachMonthOfInterval
+} from 'date-fns';
 import { zhCN } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { HeatmapCard } from './HeatmapCard';
@@ -15,26 +20,64 @@ interface EnhancedStatsViewProps {
 
 export const EnhancedStatsView = ({ records, events }: EnhancedStatsViewProps) => {
   const [timeRange, setTimeRange] = useState<TimeRange>('month');
-  const [currentMonth, setCurrentMonth] = useState(new Date());
+  const [currentDate, setCurrentDate] = useState(new Date());
 
-  const goToPreviousMonth = () => setCurrentMonth(prev => subMonths(prev, 1));
-  const goToNextMonth = () => setCurrentMonth(prev => addMonths(prev, 1));
+  // Navigation handlers based on time range
+  const goToPrevious = () => {
+    if (timeRange === 'week') {
+      setCurrentDate(prev => subWeeks(prev, 1));
+    } else if (timeRange === 'month') {
+      setCurrentDate(prev => subMonths(prev, 1));
+    } else {
+      setCurrentDate(prev => subYears(prev, 1));
+    }
+  };
 
-  const monthStr = format(currentMonth, 'yyyy-MM');
-  
+  const goToNext = () => {
+    if (timeRange === 'week') {
+      setCurrentDate(prev => addWeeks(prev, 1));
+    } else if (timeRange === 'month') {
+      setCurrentDate(prev => addMonths(prev, 1));
+    } else {
+      setCurrentDate(prev => addYears(prev, 1));
+    }
+  };
+
+  // Get date range based on time range selection
+  const dateRange = useMemo(() => {
+    if (timeRange === 'week') {
+      const weekStart = startOfWeek(currentDate, { weekStartsOn: 1 });
+      const weekEnd = endOfWeek(currentDate, { weekStartsOn: 1 });
+      return { start: weekStart, end: weekEnd };
+    } else if (timeRange === 'month') {
+      return { start: startOfMonth(currentDate), end: addDays(startOfMonth(addMonths(currentDate, 1)), -1) };
+    } else {
+      return { start: startOfYear(currentDate), end: endOfYear(currentDate) };
+    }
+  }, [timeRange, currentDate]);
+
+  // Format display title
+  const displayTitle = useMemo(() => {
+    if (timeRange === 'week') {
+      const weekStart = startOfWeek(currentDate, { weekStartsOn: 1 });
+      const weekEnd = endOfWeek(currentDate, { weekStartsOn: 1 });
+      return `${format(weekStart, 'MM/dd', { locale: zhCN })} - ${format(weekEnd, 'MM/dd', { locale: zhCN })}`;
+    } else if (timeRange === 'month') {
+      return format(currentDate, 'yyyy年 MM月', { locale: zhCN });
+    } else {
+      return format(currentDate, 'yyyy年', { locale: zhCN });
+    }
+  }, [timeRange, currentDate]);
+
+  // Filter records based on time range
+  const filteredRecords = useMemo(() => {
+    const startStr = format(dateRange.start, 'yyyy-MM-dd');
+    const endStr = format(dateRange.end, 'yyyy-MM-dd');
+    return records.filter(r => r.date >= startStr && r.date <= endStr);
+  }, [records, dateRange]);
+
   const stats = useMemo(() => {
     const now = new Date();
-    const monthStart = startOfMonth(currentMonth);
-    
-    // Filter records by time range
-    let filteredRecords = records;
-    if (timeRange === 'month') {
-      filteredRecords = records.filter(r => r.date.startsWith(monthStr));
-    } else if (timeRange === 'week') {
-      const weekAgo = format(subDays(now, 7), 'yyyy-MM-dd');
-      filteredRecords = records.filter(r => r.date >= weekAgo);
-    }
-    
     const uniqueDates = new Set(filteredRecords.map(r => r.date));
     const uniqueRecordDates = new Set(records.map(r => r.date));
     
@@ -51,18 +94,17 @@ export const EnhancedStatsView = ({ records, events }: EnhancedStatsViewProps) =
       usageDays: daysSinceStart,
       recordDays: uniqueDates.size,
     };
-  }, [records, events, timeRange, monthStr, currentMonth]);
+  }, [records, events, filteredRecords]);
 
-  const monthRecordsByEvent = useMemo(() => {
+  // Group records by event for heatmap
+  const recordsByEvent = useMemo(() => {
     const map: { [eventId: string]: EventRecord[] } = {};
-    records
-      .filter(r => r.date.startsWith(monthStr))
-      .forEach(r => {
-        if (!map[r.eventId]) map[r.eventId] = [];
-        map[r.eventId].push(r);
-      });
+    filteredRecords.forEach(r => {
+      if (!map[r.eventId]) map[r.eventId] = [];
+      map[r.eventId].push(r);
+    });
     return map;
-  }, [records, monthStr]);
+  }, [filteredRecords]);
 
   return (
     <div className="animate-fade-in space-y-6">
@@ -114,19 +156,19 @@ export const EnhancedStatsView = ({ records, events }: EnhancedStatsViewProps) =
         ))}
       </div>
 
-      {/* Month Navigation */}
+      {/* Navigation */}
       <div className="flex items-center justify-center gap-4">
         <button 
-          onClick={goToPreviousMonth}
+          onClick={goToPrevious}
           className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-muted transition-colors"
         >
           <ChevronLeft className="w-5 h-5 text-muted-foreground" />
         </button>
-        <span className="text-base font-medium">
-          {format(currentMonth, 'yyyy年 MM月', { locale: zhCN })}
+        <span className="text-base font-medium min-w-[140px] text-center">
+          {displayTitle}
         </span>
         <button 
-          onClick={goToNextMonth}
+          onClick={goToNext}
           className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-muted transition-colors"
         >
           <ChevronRight className="w-5 h-5 text-muted-foreground" />
@@ -144,8 +186,9 @@ export const EnhancedStatsView = ({ records, events }: EnhancedStatsViewProps) =
             <HeatmapCard
               key={event.id}
               event={event}
-              records={monthRecordsByEvent[event.id] || []}
-              currentMonth={currentMonth}
+              records={recordsByEvent[event.id] || []}
+              currentDate={currentDate}
+              timeRange={timeRange}
             />
           ))}
         </div>
