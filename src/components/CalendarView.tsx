@@ -1,8 +1,8 @@
 import { useState, useMemo } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { addMonths, subMonths, startOfMonth, getDay } from 'date-fns';
+import { ChevronDown } from 'lucide-react';
+import { addMonths, subMonths, startOfMonth, endOfMonth, startOfWeek, endOfWeek, eachDayOfInterval, isSameMonth, format } from 'date-fns';
 import { cn } from '@/lib/utils';
-import { formatMonth, formatDate, getMonthDays, getWeekDays, isTodayDate } from '@/lib/dateUtils';
+import { formatMonth, formatDate, isTodayDate } from '@/lib/dateUtils';
 import type { EventRecord, Event } from '@/types';
 
 interface CalendarViewProps {
@@ -15,8 +15,17 @@ interface CalendarViewProps {
 export const CalendarView = ({ records, events, onDateSelect, selectedDate }: CalendarViewProps) => {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   
-  const monthDays = useMemo(() => getMonthDays(currentMonth), [currentMonth]);
-  const weekDays = getWeekDays();
+  // Get all days to display (including days from prev/next month to fill the grid)
+  const calendarDays = useMemo(() => {
+    const monthStart = startOfMonth(currentMonth);
+    const monthEnd = endOfMonth(currentMonth);
+    const calendarStart = startOfWeek(monthStart, { weekStartsOn: 0 });
+    const calendarEnd = endOfWeek(monthEnd, { weekStartsOn: 0 });
+    
+    return eachDayOfInterval({ start: calendarStart, end: calendarEnd });
+  }, [currentMonth]);
+
+  const weekDays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
   
   const recordsByDate = useMemo(() => {
     const map: { [date: string]: EventRecord[] } = {};
@@ -27,8 +36,6 @@ export const CalendarView = ({ records, events, onDateSelect, selectedDate }: Ca
     return map;
   }, [records]);
 
-  const firstDayOffset = getDay(startOfMonth(currentMonth));
-
   const goToPreviousMonth = () => setCurrentMonth(prev => subMonths(prev, 1));
   const goToNextMonth = () => setCurrentMonth(prev => addMonths(prev, 1));
 
@@ -37,101 +44,121 @@ export const CalendarView = ({ records, events, onDateSelect, selectedDate }: Ca
     return event?.color || 'amber';
   };
 
-  const colorDotClasses: { [key: string]: string } = {
-    amber: 'bg-amber-400',
-    rose: 'bg-rose-400',
-    emerald: 'bg-emerald-400',
-    sky: 'bg-sky-400',
-    violet: 'bg-violet-400',
-    orange: 'bg-orange-400',
+  const colorClasses: { [key: string]: string } = {
+    amber: 'bg-amber-100 text-amber-700',
+    rose: 'bg-rose-100 text-rose-700',
+    emerald: 'bg-emerald-100 text-emerald-700',
+    sky: 'bg-sky-100 text-sky-700',
+    violet: 'bg-violet-100 text-violet-700',
+    orange: 'bg-orange-100 text-orange-700',
   };
 
   return (
-    <div className="animate-fade-in">
-      {/* Month Navigation */}
-      <div className="flex items-center justify-between mb-6">
+    <div className="animate-fade-in -mx-5">
+      {/* Month Header */}
+      <div className="flex items-center justify-between px-5 mb-4">
         <button 
           onClick={goToPreviousMonth}
-          className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-muted transition-colors"
+          className="text-lg font-medium flex items-center gap-1"
         >
-          <ChevronLeft className="w-5 h-5 text-muted-foreground" />
+          <span>{formatMonth(currentMonth)}</span>
+          <ChevronDown className="w-5 h-5 text-muted-foreground" />
         </button>
-        <h2 className="text-lg font-medium">{formatMonth(currentMonth)}</h2>
+        <div className="flex items-center gap-2">
+          <button 
+            onClick={() => setCurrentMonth(new Date())}
+            className="px-3 py-1 text-sm rounded-full hover:bg-muted transition-colors"
+          >
+            今天
+          </button>
+        </div>
+      </div>
+
+      {/* Swipe hint for month navigation */}
+      <div className="flex">
+        <button 
+          onClick={goToPreviousMonth}
+          className="w-8 flex-shrink-0 flex items-center justify-center text-muted-foreground hover:text-foreground"
+        >
+          ‹
+        </button>
+        
+        <div className="flex-1">
+          {/* Week Headers */}
+          <div className="grid grid-cols-7 border-b border-border">
+            {weekDays.map(day => (
+              <div key={day} className="text-center text-sm text-muted-foreground py-2 font-medium">
+                {day}
+              </div>
+            ))}
+          </div>
+
+          {/* Calendar Grid */}
+          <div className="grid grid-cols-7">
+            {calendarDays.map((day, index) => {
+              const dateStr = formatDate(day);
+              const dayRecords = recordsByDate[dateStr] || [];
+              const isCurrentMonth = isSameMonth(day, currentMonth);
+              const isSelected = selectedDate === dateStr;
+              const isToday = isTodayDate(day);
+              
+              // Get unique events for this day (show up to 2)
+              const dayEvents = [...new Set(dayRecords.map(r => r.eventId))]
+                .map(eventId => events.find(e => e.id === eventId))
+                .filter(Boolean)
+                .slice(0, 2) as Event[];
+
+              return (
+                <button
+                  key={dateStr}
+                  onClick={() => onDateSelect(dateStr)}
+                  className={cn(
+                    'min-h-[80px] p-1 flex flex-col items-center border-b border-r border-border/50 transition-colors',
+                    isSelected && 'bg-accent',
+                    !isCurrentMonth && 'opacity-40',
+                  )}
+                >
+                  {/* Date number */}
+                  <span className={cn(
+                    'text-sm w-7 h-7 flex items-center justify-center rounded-full mb-1',
+                    isToday && 'bg-primary text-primary-foreground font-medium',
+                    !isToday && isCurrentMonth && 'text-foreground',
+                    !isToday && !isCurrentMonth && 'text-muted-foreground'
+                  )}>
+                    {isToday && isCurrentMonth ? '今' : day.getDate()}
+                  </span>
+                  
+                  {/* Event tags */}
+                  <div className="flex flex-col gap-0.5 w-full px-0.5">
+                    {dayEvents.map(event => (
+                      <span 
+                        key={event.id}
+                        className={cn(
+                          'text-[10px] px-1.5 py-0.5 rounded truncate text-center',
+                          colorClasses[event.color || 'amber']
+                        )}
+                      >
+                        {event.name}
+                      </span>
+                    ))}
+                    {dayRecords.length > 2 && (
+                      <span className="text-[10px] text-muted-foreground text-center">
+                        +{dayRecords.length - 2}
+                      </span>
+                    )}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
         <button 
           onClick={goToNextMonth}
-          className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-muted transition-colors"
+          className="w-8 flex-shrink-0 flex items-center justify-center text-muted-foreground hover:text-foreground"
         >
-          <ChevronRight className="w-5 h-5 text-muted-foreground" />
+          ›
         </button>
-      </div>
-
-      {/* Week Headers */}
-      <div className="grid grid-cols-7 mb-2">
-        {weekDays.map(day => (
-          <div key={day} className="text-center text-sm text-muted-foreground py-2">
-            {day}
-          </div>
-        ))}
-      </div>
-
-      {/* Calendar Grid */}
-      <div className="grid grid-cols-7 gap-1">
-        {/* Empty cells for offset */}
-        {Array.from({ length: firstDayOffset }).map((_, i) => (
-          <div key={`empty-${i}`} className="aspect-square" />
-        ))}
-        
-        {/* Day cells */}
-        {monthDays.map(day => {
-          const dateStr = formatDate(day);
-          const dayRecords = recordsByDate[dateStr] || [];
-          const hasRecords = dayRecords.length > 0;
-          const isSelected = selectedDate === dateStr;
-          const isToday = isTodayDate(day);
-          
-          // Get unique event names for this day (show up to 2)
-          const eventNames = [...new Set(dayRecords.map(r => {
-            const event = events.find(e => e.id === r.eventId);
-            return event?.name || '';
-          }))].filter(Boolean).slice(0, 2);
-
-          return (
-            <button
-              key={dateStr}
-              onClick={() => onDateSelect(dateStr)}
-              className={cn(
-                'aspect-square rounded-xl flex flex-col items-center justify-center transition-all p-1 relative',
-                isSelected && 'bg-primary text-primary-foreground',
-                !isSelected && hasRecords && 'bg-accent',
-                !isSelected && !hasRecords && 'hover:bg-muted/50',
-              )}
-            >
-              {/* Today indicator */}
-              {isToday && !isSelected ? (
-                <span className="w-8 h-8 rounded-full bg-foreground text-background flex items-center justify-center text-sm font-medium">
-                  今
-                </span>
-              ) : (
-                <span className={cn(
-                  'text-sm',
-                  isSelected ? 'font-medium' : 'text-foreground',
-                  !hasRecords && !isSelected && 'text-muted-foreground'
-                )}>
-                  {day.getDate()}
-                </span>
-              )}
-              
-              {/* Event name tags (only when not selected) */}
-              {hasRecords && !isSelected && eventNames.length > 0 && (
-                <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 whitespace-nowrap">
-                  <span className="text-[10px] text-primary font-medium px-1 py-0.5 bg-primary/10 rounded">
-                    {eventNames[0]}
-                  </span>
-                </div>
-              )}
-            </button>
-          );
-        })}
       </div>
     </div>
   );
