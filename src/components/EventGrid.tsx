@@ -70,12 +70,17 @@ export const EventGrid = ({ events, getLastRecord, onQuickRecord, onDeleteEvent 
     }
   }, []);
 
-  const handleCardClick = useCallback((eventId: string) => {
+  const handleCardClick = useCallback((event: Event) => {
     if (!isLongPressRef.current) {
-      navigate(`/event/${eventId}`);
+      // If quick record is enabled, record immediately instead of navigating
+      if (event.quickRecord) {
+        onQuickRecord(event.id);
+      } else {
+        navigate(`/event/${event.id}`);
+      }
     }
     isLongPressRef.current = false;
-  }, [navigate]);
+  }, [navigate, onQuickRecord]);
 
   const handleQuickRecordClick = useCallback((e: React.MouseEvent, eventId: string) => {
     e.stopPropagation();
@@ -123,7 +128,7 @@ export const EventGrid = ({ events, getLastRecord, onQuickRecord, onDeleteEvent 
           return (
             <div
               key={event.id}
-              onClick={() => handleCardClick(event.id)}
+              onClick={() => handleCardClick(event)}
               onTouchStart={() => handleTouchStart(event)}
               onTouchEnd={handleTouchEnd}
               onTouchCancel={handleTouchEnd}

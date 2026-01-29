@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import type { Event } from '@/types';
+import type { Event, EventAttribute } from '@/types';
 import * as storage from '@/lib/storage';
 
 export const useEvents = () => {
@@ -16,7 +16,10 @@ export const useEvents = () => {
     loadEvents();
   }, [loadEvents]);
 
-  const addEvent = useCallback((event: Omit<Event, 'id' | 'createdAt'>) => {
+  const addEvent = useCallback((event: Omit<Event, 'id' | 'createdAt'> & { 
+    quickRecord?: boolean; 
+    attributes?: EventAttribute[] 
+  }) => {
     const newEvent: Event = {
       ...event,
       id: storage.generateId(),
