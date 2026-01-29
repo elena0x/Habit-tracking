@@ -184,19 +184,19 @@ export const EventGrid = ({ events, getLastRecord, getTodayRecordCount, onQuickR
                 className={cn(
                   'absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center transition-all',
                   hasRecordedToday
-                    ? 'bg-primary/20 shadow-sm scale-110'
-                    : 'bg-background/80 hover:bg-background'
+                    ? 'bg-primary text-primary-foreground shadow-md scale-110 animate-pulse'
+                    : 'bg-background/80 hover:bg-background hover:scale-105'
                 )}
               >
                 {isQuickRecord ? (
                   <Zap className={cn(
                     'w-4 h-4 transition-all',
-                    hasRecordedToday ? 'text-primary fill-primary' : 'text-primary'
+                    hasRecordedToday ? 'fill-current' : 'text-primary'
                   )} />
                 ) : (
                   <Plus className={cn(
                     'w-4 h-4 transition-all',
-                    hasRecordedToday ? 'text-primary' : 'text-muted-foreground'
+                    hasRecordedToday ? '' : 'text-muted-foreground'
                   )} />
                 )}
               </button>
