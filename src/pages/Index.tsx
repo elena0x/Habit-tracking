@@ -10,7 +10,7 @@ import { BottomNav } from '@/components/BottomNav';
 import { FloatingAddButton } from '@/components/FloatingAddButton';
 import { EmptyState } from '@/components/EmptyState';
 import { RecordToast } from '@/components/RecordToast';
-import { NoteInputDialog } from '@/components/NoteInputDialog';
+import { RecordInputSheet } from '@/components/RecordInputSheet';
 import Settings from '@/pages/Settings';
 import type { Event, EventType } from '@/types';
 import { getCurrentDate } from '@/lib/dateUtils';
@@ -23,8 +23,8 @@ const Index = () => {
   const [createSheetOpen, setCreateSheetOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState<string>(getCurrentDate());
   const [toastEvent, setToastEvent] = useState<Event | null>(null);
-  const [noteDialogOpen, setNoteDialogOpen] = useState(false);
-  const [noteDialogEvent, setNoteDialogEvent] = useState<Event | null>(null);
+  const [recordSheetOpen, setRecordSheetOpen] = useState(false);
+  const [recordSheetEvent, setRecordSheetEvent] = useState<Event | null>(null);
 
   const { events, addEvent, deleteEvent, getEventById } = useEvents();
   const { records, addRecord, getLastRecordForEvent, getRecordsByDate } = useRecords();
@@ -33,20 +33,21 @@ const Index = () => {
     const event = getEventById(eventId);
     if (!event) return;
     
-    // For log type events, show note input dialog
-    if (event.type === 'log') {
-      setNoteDialogEvent(event);
-      setNoteDialogOpen(true);
+    // If event has attributes or is log type, show input sheet
+    const hasAttributes = event.attributes && event.attributes.length > 0;
+    if (hasAttributes || event.type === 'log') {
+      setRecordSheetEvent(event);
+      setRecordSheetOpen(true);
       return;
     }
     
-    // For other types, record immediately
+    // For events without attributes, record immediately
     addRecord(eventId);
     setToastEvent(event);
   }, [addRecord, getEventById]);
 
-  const handleNoteConfirm = useCallback((eventId: string, note: string) => {
-    addRecord(eventId, { note: note || undefined });
+  const handleRecordConfirm = useCallback((eventId: string, data: { note?: string; extra?: Record<string, unknown> }) => {
+    addRecord(eventId, { note: data.note, extra: data.extra });
     const event = getEventById(eventId);
     if (event) {
       setToastEvent(event);
@@ -157,12 +158,12 @@ const Index = () => {
       {/* Record Toast */}
       <RecordToast event={toastEvent} onHide={() => setToastEvent(null)} />
 
-      {/* Note Input Dialog for log type events */}
-      <NoteInputDialog
-        open={noteDialogOpen}
-        onOpenChange={setNoteDialogOpen}
-        event={noteDialogEvent}
-        onConfirm={handleNoteConfirm}
+      {/* Record Input Sheet for events with attributes */}
+      <RecordInputSheet
+        open={recordSheetOpen}
+        onOpenChange={setRecordSheetOpen}
+        event={recordSheetEvent}
+        onConfirm={handleRecordConfirm}
       />
     </div>
   );

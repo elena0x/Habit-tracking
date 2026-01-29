@@ -17,13 +17,19 @@ export const useRecords = () => {
     loadRecords();
   }, [loadRecords]);
 
-  const addRecord = useCallback((eventId: string, options?: { date?: string; time?: string; note?: string }) => {
+  const addRecord = useCallback((eventId: string, options?: { 
+    date?: string; 
+    time?: string; 
+    note?: string;
+    extra?: Record<string, unknown>;
+  }) => {
     const newRecord: EventRecord = {
       id: storage.generateId(),
       eventId,
       date: options?.date || getCurrentDate(),
       time: options?.time || getCurrentTime(),
       note: options?.note,
+      extra: options?.extra,
       createdAt: new Date().toISOString(),
     };
     storage.addRecord(newRecord);
