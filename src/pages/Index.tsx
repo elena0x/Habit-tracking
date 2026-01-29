@@ -93,6 +93,30 @@ const Index = () => {
               </button>
             </div>
           )}
+          {activeTab === 'calendar' && (
+            <div className="flex items-center gap-1 bg-muted/50 rounded-full p-1">
+              <button
+                onClick={() => setCalendarViewMode('calendar')}
+                className={`p-2 rounded-full transition-colors ${
+                  calendarViewMode === 'calendar' 
+                    ? 'bg-background shadow-sm text-foreground' 
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                <Calendar className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => setCalendarViewMode('timeline')}
+                className={`p-2 rounded-full transition-colors ${
+                  calendarViewMode === 'timeline' 
+                    ? 'bg-background shadow-sm text-foreground' 
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                <List className="w-4 h-4" />
+              </button>
+            </div>
+          )}
         </div>
       </header>
 
@@ -117,48 +141,14 @@ const Index = () => {
 
         {/* Calendar Tab */}
         {activeTab === 'calendar' && (
-          <div className="space-y-4">
-            {/* View Toggle */}
-            <div className="flex items-center justify-end gap-1 bg-muted/50 rounded-full p-1 w-fit ml-auto">
-              <button
-                onClick={() => setCalendarViewMode('calendar')}
-                className={`p-2 rounded-full transition-colors ${
-                  calendarViewMode === 'calendar' 
-                    ? 'bg-background shadow-sm text-foreground' 
-                    : 'text-muted-foreground hover:text-foreground'
-                }`}
-              >
-                <Calendar className="w-4 h-4" />
-              </button>
-              <button
-                onClick={() => setCalendarViewMode('timeline')}
-                className={`p-2 rounded-full transition-colors ${
-                  calendarViewMode === 'timeline' 
-                    ? 'bg-background shadow-sm text-foreground' 
-                    : 'text-muted-foreground hover:text-foreground'
-                }`}
-              >
-                <List className="w-4 h-4" />
-              </button>
-            </div>
-
+          <>
             {calendarViewMode === 'calendar' ? (
-              <>
-                <CalendarView
-                  records={records}
-                  events={events}
-                  onDateSelect={handleDateSelect}
-                  selectedDate={selectedDate}
-                />
-                {/* Show selected date records below calendar */}
-                {selectedDateRecords.length > 0 && (
-                  <TimelineRecords
-                    date={selectedDate}
-                    records={selectedDateRecords}
-                    events={events}
-                  />
-                )}
-              </>
+              <CalendarView
+                records={records}
+                events={events}
+                onDateSelect={handleDateSelect}
+                selectedDate={selectedDate}
+              />
             ) : (
               <TimelineRecords
                 date={selectedDate}
@@ -167,7 +157,7 @@ const Index = () => {
                 showAllDates
               />
             )}
-          </div>
+          </>
         )}
 
         {/* Stats Tab */}
