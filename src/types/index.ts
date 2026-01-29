@@ -9,11 +9,18 @@ export interface SelectOption {
   label: string;
 }
 
+export interface AttributeConfig {
+  unit?: string; // For number type (e.g., '分钟', '公斤')
+  max?: number; // For rating type
+  options?: string[]; // For single_select and multi_select
+}
+
 export interface EventAttribute {
   id: string;
   name: string;
   type: AttributeType;
-  options?: SelectOption[]; // For single_select and multi_select
+  config?: AttributeConfig; // Type-specific configuration
+  options?: SelectOption[]; // Legacy: For single_select and multi_select
   required?: boolean;
 }
 

@@ -79,6 +79,7 @@ export const CreateEventSheet = ({ open, onOpenChange, onSubmit }: CreateEventSh
       icon: template.icon, 
       color: template.color,
       quickRecord: false,
+      attributes: template.attributes,
     });
     resetForm();
     onOpenChange(false);
