@@ -2,7 +2,7 @@ import { useState, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { getColorClasses, hexToRgba } from '@/lib/colorUtils';
-import { Trash2 } from 'lucide-react';
+import { Zap, Plus, Trash2 } from 'lucide-react';
 import type { Event, EventRecord } from '@/types';
 import { formatRelativeTime, isRecordedToday } from '@/lib/dateUtils';
 import {
@@ -128,9 +128,8 @@ export const EventGrid = ({ events, getLastRecord, getTodayRecordCount, onQuickR
             backgroundColor: hexToRgba(colorInfo.hex, 0.2),
           } : undefined;
 
-          // Determine icon and style based on quickRecord and today's status
+          // Determine icon based on quickRecord status
           const isQuickRecord = event.quickRecord;
-          const recordButtonIcon = isQuickRecord ? '⚡️' : '➕';
           
           return (
             <div
@@ -189,12 +188,17 @@ export const EventGrid = ({ events, getLastRecord, getTodayRecordCount, onQuickR
                     : 'bg-background/80 hover:bg-background'
                 )}
               >
-                <span className={cn(
-                  'text-base transition-transform',
-                  hasRecordedToday && 'animate-pulse'
-                )}>
-                  {recordButtonIcon}
-                </span>
+                {isQuickRecord ? (
+                  <Zap className={cn(
+                    'w-4 h-4 transition-all',
+                    hasRecordedToday ? 'text-primary fill-primary' : 'text-primary'
+                  )} />
+                ) : (
+                  <Plus className={cn(
+                    'w-4 h-4 transition-all',
+                    hasRecordedToday ? 'text-primary' : 'text-muted-foreground'
+                  )} />
+                )}
               </button>
             </div>
           );
