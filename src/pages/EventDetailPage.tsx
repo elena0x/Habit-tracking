@@ -107,7 +107,7 @@ const EventDetailPage = () => {
       <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-lg border-b border-border/50">
         <div className="max-w-lg mx-auto px-5 py-4 flex items-center gap-3">
           <button 
-            onClick={() => navigate(-1)}
+            onClick={() => navigate('/')}
             className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-muted"
           >
             <ArrowLeft className="w-5 h-5" />
