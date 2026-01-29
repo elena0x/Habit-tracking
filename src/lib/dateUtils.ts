@@ -52,3 +52,16 @@ export const getCurrentDate = (): string => {
 export const getCurrentTime = (): string => {
   return formatTime(new Date());
 };
+
+// Get current date in Beijing timezone (UTC+8)
+export const getBeijingDate = (): string => {
+  const now = new Date();
+  // Convert to Beijing time by adding 8 hours offset
+  const beijingTime = new Date(now.getTime() + (8 * 60 * 60 * 1000) - (now.getTimezoneOffset() * 60 * 1000));
+  return format(beijingTime, 'yyyy-MM-dd');
+};
+
+// Check if a record date matches today in Beijing timezone
+export const isRecordedToday = (recordDate: string): boolean => {
+  return recordDate === getBeijingDate();
+};

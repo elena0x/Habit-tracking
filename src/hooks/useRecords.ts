@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import type { EventRecord } from '@/types';
 import * as storage from '@/lib/storage';
-import { getCurrentDate, getCurrentTime } from '@/lib/dateUtils';
+import { getCurrentDate, getCurrentTime, getBeijingDate } from '@/lib/dateUtils';
 
 export const useRecords = () => {
   const [records, setRecords] = useState<EventRecord[]>([]);
@@ -67,6 +67,11 @@ export const useRecords = () => {
     return [...new Set(monthRecords.map(r => r.date))];
   }, [records]);
 
+  const getTodayRecordCount = useCallback((eventId: string) => {
+    const today = getBeijingDate();
+    return records.filter(r => r.eventId === eventId && r.date === today).length;
+  }, [records]);
+
   return {
     records,
     loading,
@@ -77,6 +82,7 @@ export const useRecords = () => {
     getRecordsByMonth,
     getLastRecordForEvent,
     getDatesWithRecords,
+    getTodayRecordCount,
     refresh: loadRecords,
   };
 };

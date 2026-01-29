@@ -2,9 +2,9 @@ import { useState, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { getColorClasses, hexToRgba } from '@/lib/colorUtils';
-import { Zap, Plus, Trash2 } from 'lucide-react';
+import { Trash2 } from 'lucide-react';
 import type { Event, EventRecord } from '@/types';
-import { formatRelativeTime } from '@/lib/dateUtils';
+import { formatRelativeTime, isRecordedToday } from '@/lib/dateUtils';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -19,6 +19,7 @@ import {
 interface EventGridProps {
   events: Event[];
   getLastRecord: (eventId: string) => EventRecord | null;
+  getTodayRecordCount: (eventId: string) => number;
   onQuickRecord: (eventId: string) => void;
   onDeleteEvent?: (eventId: string) => void;
 }
@@ -44,7 +45,7 @@ const presetIconBgClasses: { [key: string]: string } = {
   orange: 'bg-orange-100',
 };
 
-export const EventGrid = ({ events, getLastRecord, onQuickRecord, onDeleteEvent }: EventGridProps) => {
+export const EventGrid = ({ events, getLastRecord, getTodayRecordCount, onQuickRecord, onDeleteEvent }: EventGridProps) => {
   const navigate = useNavigate();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [eventToDelete, setEventToDelete] = useState<Event | null>(null);
@@ -105,6 +106,8 @@ export const EventGrid = ({ events, getLastRecord, onQuickRecord, onDeleteEvent 
       <div className="grid grid-cols-2 gap-3 animate-fade-in">
         {events.map(event => {
           const lastRecord = getLastRecord(event.id);
+          const todayCount = getTodayRecordCount(event.id);
+          const hasRecordedToday = todayCount > 0;
           const colorInfo = getColorClasses(event.color);
           const isCustomColor = colorInfo.isCustom;
           
@@ -124,6 +127,10 @@ export const EventGrid = ({ events, getLastRecord, onQuickRecord, onDeleteEvent 
           const customIconBgStyle = isCustomColor ? {
             backgroundColor: hexToRgba(colorInfo.hex, 0.2),
           } : undefined;
+
+          // Determine icon and style based on quickRecord and today's status
+          const isQuickRecord = event.quickRecord;
+          const recordButtonIcon = isQuickRecord ? '⚡️' : '➕';
           
           return (
             <div
@@ -166,19 +173,28 @@ export const EventGrid = ({ events, getLastRecord, onQuickRecord, onDeleteEvent 
               
               {/* Last Record */}
               <p className="text-xs text-muted-foreground">
-                上次：{lastRecord ? formatRelativeTime(lastRecord.createdAt) : '–'}
+                {hasRecordedToday 
+                  ? `今日已记 ${todayCount} 次` 
+                  : `上次：${lastRecord ? formatRelativeTime(lastRecord.createdAt) : '–'}`
+                }
               </p>
               
               {/* Quick Action Button */}
               <button
                 onClick={(e) => handleQuickRecordClick(e, event.id)}
-                className="absolute top-3 right-3 w-8 h-8 rounded-full bg-background/80 hover:bg-background flex items-center justify-center transition-colors"
-              >
-                {event.type === 'daily' ? (
-                  <Zap className="w-4 h-4 text-primary" />
-                ) : (
-                  <Plus className="w-4 h-4 text-primary" />
+                className={cn(
+                  'absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center transition-all',
+                  hasRecordedToday
+                    ? 'bg-primary/20 shadow-sm scale-110'
+                    : 'bg-background/80 hover:bg-background'
                 )}
+              >
+                <span className={cn(
+                  'text-base transition-transform',
+                  hasRecordedToday && 'animate-pulse'
+                )}>
+                  {recordButtonIcon}
+                </span>
               </button>
             </div>
           );
