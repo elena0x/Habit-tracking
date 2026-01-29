@@ -14,9 +14,10 @@ import { RecordInputSheet } from '@/components/RecordInputSheet';
 import Settings from '@/pages/Settings';
 import type { Event, EventType } from '@/types';
 import { getCurrentDate } from '@/lib/dateUtils';
-import { Search, Bell, Plus } from 'lucide-react';
+import { Search, Bell, Plus, Calendar, List } from 'lucide-react';
 
 type TabType = 'home' | 'calendar' | 'stats' | 'settings';
+type CalendarViewMode = 'calendar' | 'timeline';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState<TabType>('home');
@@ -25,6 +26,7 @@ const Index = () => {
   const [toastEvent, setToastEvent] = useState<Event | null>(null);
   const [recordSheetOpen, setRecordSheetOpen] = useState(false);
   const [recordSheetEvent, setRecordSheetEvent] = useState<Event | null>(null);
+  const [calendarViewMode, setCalendarViewMode] = useState<CalendarViewMode>('calendar');
 
   const { events, addEvent, deleteEvent, getEventById } = useEvents();
   const { records, addRecord, getLastRecordForEvent, getRecordsByDate, getTodayRecordCount } = useRecords();
@@ -115,18 +117,56 @@ const Index = () => {
 
         {/* Calendar Tab */}
         {activeTab === 'calendar' && (
-          <div className="space-y-6">
-            <CalendarView
-              records={records}
-              events={events}
-              onDateSelect={handleDateSelect}
-              selectedDate={selectedDate}
-            />
-            <TimelineRecords
-              date={selectedDate}
-              records={selectedDateRecords}
-              events={events}
-            />
+          <div className="space-y-4">
+            {/* View Toggle */}
+            <div className="flex items-center justify-end gap-1 bg-muted/50 rounded-full p-1 w-fit ml-auto">
+              <button
+                onClick={() => setCalendarViewMode('calendar')}
+                className={`p-2 rounded-full transition-colors ${
+                  calendarViewMode === 'calendar' 
+                    ? 'bg-background shadow-sm text-foreground' 
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                <Calendar className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => setCalendarViewMode('timeline')}
+                className={`p-2 rounded-full transition-colors ${
+                  calendarViewMode === 'timeline' 
+                    ? 'bg-background shadow-sm text-foreground' 
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                <List className="w-4 h-4" />
+              </button>
+            </div>
+
+            {calendarViewMode === 'calendar' ? (
+              <>
+                <CalendarView
+                  records={records}
+                  events={events}
+                  onDateSelect={handleDateSelect}
+                  selectedDate={selectedDate}
+                />
+                {/* Show selected date records below calendar */}
+                {selectedDateRecords.length > 0 && (
+                  <TimelineRecords
+                    date={selectedDate}
+                    records={selectedDateRecords}
+                    events={events}
+                  />
+                )}
+              </>
+            ) : (
+              <TimelineRecords
+                date={selectedDate}
+                records={records}
+                events={events}
+                showAllDates
+              />
+            )}
           </div>
         )}
 

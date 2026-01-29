@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { ChevronDown } from 'lucide-react';
-import { addMonths, subMonths, startOfMonth, endOfMonth, startOfWeek, endOfWeek, eachDayOfInterval, isSameMonth, format } from 'date-fns';
+import { addMonths, subMonths, startOfMonth, endOfMonth, startOfWeek, endOfWeek, eachDayOfInterval, isSameMonth } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { formatMonth, formatDate, isTodayDate } from '@/lib/dateUtils';
 import type { EventRecord, Event } from '@/types';
@@ -39,18 +39,13 @@ export const CalendarView = ({ records, events, onDateSelect, selectedDate }: Ca
   const goToPreviousMonth = () => setCurrentMonth(prev => subMonths(prev, 1));
   const goToNextMonth = () => setCurrentMonth(prev => addMonths(prev, 1));
 
-  const getEventColor = (eventId: string): string => {
-    const event = events.find(e => e.id === eventId);
-    return event?.color || 'amber';
-  };
-
-  const colorClasses: { [key: string]: string } = {
-    amber: 'bg-amber-100 text-amber-700',
-    rose: 'bg-rose-100 text-rose-700',
-    emerald: 'bg-emerald-100 text-emerald-700',
-    sky: 'bg-sky-100 text-sky-700',
-    violet: 'bg-violet-100 text-violet-700',
-    orange: 'bg-orange-100 text-orange-700',
+  const colorBgClasses: { [key: string]: string } = {
+    amber: 'bg-amber-400',
+    rose: 'bg-rose-400',
+    emerald: 'bg-emerald-400',
+    sky: 'bg-sky-400',
+    violet: 'bg-violet-400',
+    orange: 'bg-orange-400',
   };
 
   return (
@@ -74,7 +69,7 @@ export const CalendarView = ({ records, events, onDateSelect, selectedDate }: Ca
         </div>
       </div>
 
-      {/* Swipe hint for month navigation */}
+      {/* Calendar with nav arrows */}
       <div className="flex">
         <button 
           onClick={goToPreviousMonth}
@@ -95,25 +90,25 @@ export const CalendarView = ({ records, events, onDateSelect, selectedDate }: Ca
 
           {/* Calendar Grid */}
           <div className="grid grid-cols-7">
-            {calendarDays.map((day, index) => {
+            {calendarDays.map((day) => {
               const dateStr = formatDate(day);
               const dayRecords = recordsByDate[dateStr] || [];
               const isCurrentMonth = isSameMonth(day, currentMonth);
               const isSelected = selectedDate === dateStr;
               const isToday = isTodayDate(day);
               
-              // Get unique events for this day (show up to 2)
-              const dayEvents = [...new Set(dayRecords.map(r => r.eventId))]
-                .map(eventId => events.find(e => e.id === eventId))
-                .filter(Boolean)
-                .slice(0, 2) as Event[];
+              // Get unique event colors for this day
+              const eventColors = [...new Set(dayRecords.map(r => {
+                const event = events.find(e => e.id === r.eventId);
+                return event?.color || 'amber';
+              }))];
 
               return (
                 <button
                   key={dateStr}
                   onClick={() => onDateSelect(dateStr)}
                   className={cn(
-                    'min-h-[80px] p-1 flex flex-col items-center border-b border-r border-border/50 transition-colors',
+                    'min-h-[72px] p-1 flex flex-col items-center border-b border-r border-border/50 transition-colors',
                     isSelected && 'bg-accent',
                     !isCurrentMonth && 'opacity-40',
                   )}
@@ -128,25 +123,20 @@ export const CalendarView = ({ records, events, onDateSelect, selectedDate }: Ca
                     {isToday && isCurrentMonth ? '今' : day.getDate()}
                   </span>
                   
-                  {/* Event tags */}
-                  <div className="flex flex-col gap-0.5 w-full px-0.5">
-                    {dayEvents.map(event => (
-                      <span 
-                        key={event.id}
-                        className={cn(
-                          'text-[10px] px-1.5 py-0.5 rounded truncate text-center',
-                          colorClasses[event.color || 'amber']
-                        )}
-                      >
-                        {event.name}
-                      </span>
-                    ))}
-                    {dayRecords.length > 2 && (
-                      <span className="text-[10px] text-muted-foreground text-center">
-                        +{dayRecords.length - 2}
-                      </span>
-                    )}
-                  </div>
+                  {/* Color bar - multiple colors joined together */}
+                  {eventColors.length > 0 && (
+                    <div className="flex w-full h-1.5 rounded-full overflow-hidden mt-auto mb-1 mx-1">
+                      {eventColors.map((color, idx) => (
+                        <div 
+                          key={idx}
+                          className={cn(
+                            'flex-1 h-full',
+                            colorBgClasses[color]
+                          )}
+                        />
+                      ))}
+                    </div>
+                  )}
                 </button>
               );
             })}
