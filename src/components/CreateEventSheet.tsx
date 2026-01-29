@@ -1,49 +1,73 @@
 import { useState } from 'react';
-import { X, Home } from 'lucide-react';
+import { X, ChevronRight, Plus, Info, Trash2 } from 'lucide-react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { EventTemplates, EVENT_TEMPLATES, type EventTemplate } from './EventTemplates';
-import type { EventType } from '@/types';
+import { Switch } from '@/components/ui/switch';
+import { IconPicker } from './IconPicker';
+import { AttributeTypePicker } from './AttributeTypePicker';
+import { AttributeEditor } from './AttributeEditor';
+import { EventTemplates, type EventTemplate } from './EventTemplates';
+import type { EventType, EventAttribute, AttributeType } from '@/types';
 import { cn } from '@/lib/utils';
+import { getColorClasses, hexToRgba } from '@/lib/colorUtils';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 interface CreateEventSheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSubmit: (data: { name: string; type: EventType; icon: string; color: string }) => void;
+  onSubmit: (data: { 
+    name: string; 
+    type: EventType; 
+    icon: string; 
+    color: string;
+    quickRecord?: boolean;
+    attributes?: EventAttribute[];
+  }) => void;
 }
 
-const EMOJI_OPTIONS = ['📝', '🏃', '📚', '💪', '🎯', '✨', '🌟', '💡', '🎨', '🎵', '☕', '🍎', '💤', '🧘', '✈️', '📷'];
-
-const COLOR_OPTIONS = [
-  { name: 'amber', label: '琥珀', class: 'bg-amber-400', hex: '#fbbf24' },
-  { name: 'rose', label: '玫红', class: 'bg-rose-400', hex: '#fb7185' },
-  { name: 'emerald', label: '翠绿', class: 'bg-emerald-400', hex: '#34d399' },
-  { name: 'sky', label: '天蓝', class: 'bg-sky-400', hex: '#38bdf8' },
-  { name: 'violet', label: '紫罗兰', class: 'bg-violet-400', hex: '#a78bfa' },
-  { name: 'orange', label: '橙色', class: 'bg-orange-400', hex: '#fb923c' },
+const TYPE_OPTIONS: { value: EventType; label: string }[] = [
+  { value: 'daily', label: '日常' },
+  { value: 'once', label: '一次性' },
+  { value: 'log', label: '记录' },
 ];
 
-const TYPE_OPTIONS: { value: EventType; label: string; desc: string }[] = [
-  { value: 'daily', label: '日常', desc: '可重复打卡' },
-  { value: 'once', label: '一次性', desc: '发生一次的事' },
-  { value: 'log', label: '记录', desc: '需要填写内容' },
-];
-
-type ViewMode = 'templates' | 'custom';
+type ViewMode = 'templates' | 'form';
 
 export const CreateEventSheet = ({ open, onOpenChange, onSubmit }: CreateEventSheetProps) => {
   const [viewMode, setViewMode] = useState<ViewMode>('templates');
   const [selectedCategory, setSelectedCategory] = useState('所有');
+  
+  // Form state
   const [name, setName] = useState('');
   const [type, setType] = useState<EventType>('daily');
   const [icon, setIcon] = useState('📝');
   const [color, setColor] = useState('sky');
+  const [quickRecord, setQuickRecord] = useState(false);
+  const [attributes, setAttributes] = useState<EventAttribute[]>([]);
+  
+  // Sub-dialogs
+  const [iconPickerOpen, setIconPickerOpen] = useState(false);
+  const [typePickerOpen, setTypePickerOpen] = useState(false);
+  const [attributeTypePickerOpen, setAttributeTypePickerOpen] = useState(false);
+  const [attributeEditorOpen, setAttributeEditorOpen] = useState(false);
+  const [editingAttributeType, setEditingAttributeType] = useState<AttributeType>('text');
 
   const handleSubmit = () => {
     if (!name.trim()) return;
-    onSubmit({ name: name.trim(), type, icon, color });
+    onSubmit({ 
+      name: name.trim(), 
+      type, 
+      icon, 
+      color,
+      quickRecord,
+      attributes: attributes.length > 0 ? attributes : undefined,
+    });
     resetForm();
     onOpenChange(false);
   };
@@ -53,7 +77,8 @@ export const CreateEventSheet = ({ open, onOpenChange, onSubmit }: CreateEventSh
       name: template.name, 
       type: template.type, 
       icon: template.icon, 
-      color: template.color 
+      color: template.color,
+      quickRecord: false,
     });
     resetForm();
     onOpenChange(false);
@@ -66,6 +91,8 @@ export const CreateEventSheet = ({ open, onOpenChange, onSubmit }: CreateEventSh
     setType('daily');
     setIcon('📝');
     setColor('sky');
+    setQuickRecord(false);
+    setAttributes([]);
   };
 
   const handleOpenChange = (open: boolean) => {
@@ -75,185 +102,306 @@ export const CreateEventSheet = ({ open, onOpenChange, onSubmit }: CreateEventSh
     onOpenChange(open);
   };
 
+  const handleAddAttribute = (attribute: EventAttribute) => {
+    setAttributes([...attributes, attribute]);
+  };
+
+  const handleRemoveAttribute = (id: string) => {
+    setAttributes(attributes.filter(a => a.id !== id));
+  };
+
+  const handleSelectAttributeType = (attrType: AttributeType) => {
+    setEditingAttributeType(attrType);
+    setAttributeEditorOpen(true);
+  };
+
+  const colorInfo = getColorClasses(color);
+  const iconBgStyle = colorInfo.isCustom
+    ? { backgroundColor: hexToRgba(colorInfo.hex, 0.15) }
+    : undefined;
+  const iconBgClass = colorInfo.isCustom
+    ? ''
+    : `bg-${color}-100`;
+
   return (
-    <Sheet open={open} onOpenChange={handleOpenChange}>
-      <SheetContent side="bottom" className="rounded-t-3xl px-6 pb-8 pt-6 max-h-[85vh] overflow-y-auto">
-        <SheetHeader className="mb-4">
-          <div className="flex items-center justify-between">
-            <SheetTitle className="text-xl font-semibold">新建事件</SheetTitle>
-            <button 
-              onClick={() => handleOpenChange(false)}
-              className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-muted"
-            >
-              <X className="w-5 h-5 text-muted-foreground" />
-            </button>
-          </div>
-          {viewMode === 'templates' && (
-            <p className="text-sm text-muted-foreground text-left">
-              没有想法？从选取一些预设事件开始吧
-            </p>
-          )}
-        </SheetHeader>
-
-        {viewMode === 'templates' ? (
-          <div className="space-y-6">
-            <EventTemplates
-              onSelectTemplate={handleSelectTemplate}
-              selectedCategory={selectedCategory}
-              onCategoryChange={setSelectedCategory}
-            />
-
-            {/* Action Buttons */}
-            <div className="space-y-3 pt-2">
-              <Button 
-                onClick={() => setViewMode('custom')}
-                className="w-full h-12 rounded-xl text-base font-medium"
-              >
-                自定义事件
-              </Button>
-              <button className="w-full text-center text-sm text-muted-foreground py-2">
-                从模版导入
-              </button>
-            </div>
-          </div>
-        ) : (
-          <div className="space-y-6">
-            {/* Back Button */}
-            <button 
-              onClick={() => setViewMode('templates')}
-              className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
-            >
-              <Home className="w-4 h-4" />
-              <span>返回预设</span>
-            </button>
-
-            {/* Name Input */}
-            <div className="space-y-2">
-              <Label className="text-sm text-muted-foreground">事件名称</Label>
-              <Input
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="比如：跑步、读书、喝咖啡..."
-                className="h-12 text-base rounded-xl border-border/50 bg-muted/30"
-              />
-            </div>
-
-            {/* Icon Selection */}
-            <div className="space-y-2">
-              <Label className="text-sm text-muted-foreground">选择图标</Label>
-              <div className="flex flex-wrap gap-2">
-                {EMOJI_OPTIONS.map((emoji) => (
-                  <button
-                    key={emoji}
-                    onClick={() => setIcon(emoji)}
-                    className={cn(
-                      'w-11 h-11 text-xl rounded-xl transition-all',
-                      icon === emoji 
-                        ? 'bg-primary text-primary-foreground scale-110' 
-                        : 'bg-muted/50 hover:bg-muted'
-                    )}
+    <>
+      <Sheet open={open} onOpenChange={handleOpenChange}>
+        <SheetContent side="bottom" className="rounded-t-3xl px-0 pb-8 pt-0 max-h-[90vh] overflow-hidden flex flex-col">
+          {viewMode === 'templates' ? (
+            <>
+              <SheetHeader className="px-6 pt-6 pb-4">
+                <div className="flex items-center justify-between">
+                  <button 
+                    onClick={() => handleOpenChange(false)}
+                    className="text-muted-foreground text-base"
                   >
-                    {emoji}
+                    取消
                   </button>
-                ))}
-              </div>
-              {/* Custom Emoji Input */}
-              <div className="flex items-center gap-2 mt-2">
-                <Input
-                  value={icon}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    // Get the last character/emoji from input
-                    if (value) {
-                      const chars = [...value];
-                      setIcon(chars[chars.length - 1]);
-                    }
-                  }}
-                  placeholder="或输入自定义 emoji"
-                  className="h-10 text-center text-xl rounded-xl border-border/50 bg-muted/30 w-20"
-                  maxLength={4}
-                />
-                <span className="text-xs text-muted-foreground">输入任意 emoji</span>
-              </div>
-            </div>
+                  <SheetTitle className="text-lg font-semibold">新建事件</SheetTitle>
+                  <div className="w-10" />
+                </div>
+              </SheetHeader>
 
-            {/* Color Selection */}
-            <div className="space-y-2">
-              <Label className="text-sm text-muted-foreground">选择颜色</Label>
-              <div className="flex items-center gap-3">
-                {COLOR_OPTIONS.map((c) => (
-                  <button
-                    key={c.name}
-                    onClick={() => setColor(c.name)}
-                    className={cn(
-                      'w-9 h-9 rounded-full transition-all',
-                      c.class,
-                      color === c.name 
-                        ? 'ring-2 ring-offset-2 ring-foreground/20 scale-110' 
-                        : 'opacity-60 hover:opacity-100'
-                    )}
-                  />
-                ))}
-                {/* Custom Color Picker */}
-                <div className="relative">
-                  <input
-                    type="color"
-                    value={color.startsWith('#') ? color : COLOR_OPTIONS.find(c => c.name === color)?.hex || '#38bdf8'}
-                    onChange={(e) => setColor(e.target.value)}
-                    className="w-9 h-9 rounded-full cursor-pointer border-0 p-0 overflow-hidden"
-                    style={{ 
-                      appearance: 'none',
-                      WebkitAppearance: 'none',
-                    }}
-                  />
-                  {color.startsWith('#') && (
-                    <div 
-                      className="absolute inset-0 rounded-full ring-2 ring-offset-2 ring-foreground/20 pointer-events-none"
-                      style={{ backgroundColor: color }}
-                    />
-                  )}
+              <div className="flex-1 overflow-y-auto px-6">
+                <p className="text-sm text-muted-foreground mb-4">
+                  没有想法？从选取一些预设事件开始吧
+                </p>
+                
+                <EventTemplates
+                  onSelectTemplate={handleSelectTemplate}
+                  selectedCategory={selectedCategory}
+                  onCategoryChange={setSelectedCategory}
+                />
+
+                <div className="space-y-3 pt-6 pb-4">
+                  <Button 
+                    onClick={() => setViewMode('form')}
+                    className="w-full h-12 rounded-xl text-base font-medium"
+                  >
+                    自定义事件
+                  </Button>
                 </div>
               </div>
-            </div>
-
-            {/* Type Selection */}
-            <div className="space-y-2">
-              <Label className="text-sm text-muted-foreground">事件类型</Label>
-              <div className="grid grid-cols-3 gap-2">
-                {TYPE_OPTIONS.map((t) => (
-                  <button
-                    key={t.value}
-                    onClick={() => setType(t.value)}
+            </>
+          ) : (
+            <>
+              <SheetHeader className="px-6 pt-6 pb-4 border-b border-border/50">
+                <div className="flex items-center justify-between">
+                  <button 
+                    onClick={() => handleOpenChange(false)}
+                    className="text-muted-foreground text-base"
+                  >
+                    取消
+                  </button>
+                  <SheetTitle className="text-lg font-semibold">新建事件</SheetTitle>
+                  <button 
+                    onClick={handleSubmit}
+                    disabled={!name.trim()}
                     className={cn(
-                      'p-3 rounded-xl text-left transition-all',
-                      type === t.value 
-                        ? 'bg-primary text-primary-foreground' 
-                        : 'bg-muted/50 hover:bg-muted'
+                      "text-base font-medium",
+                      name.trim() ? "text-primary" : "text-muted-foreground"
                     )}
                   >
-                    <div className="font-medium text-sm">{t.label}</div>
-                    <div className={cn(
-                      'text-xs mt-0.5',
-                      type === t.value ? 'text-primary-foreground/80' : 'text-muted-foreground'
-                    )}>
-                      {t.desc}
-                    </div>
+                    新建
                   </button>
-                ))}
-              </div>
-            </div>
+                </div>
+              </SheetHeader>
 
-            {/* Submit Button */}
-            <Button 
-              onClick={handleSubmit} 
-              disabled={!name.trim()}
-              className="w-full h-12 rounded-xl text-base font-medium"
-            >
-              创建事件
-            </Button>
+              <div className="flex-1 overflow-y-auto">
+                {/* Icon and Name Section */}
+                <div className="px-6 py-4 flex items-center gap-4">
+                  <button
+                    onClick={() => setIconPickerOpen(true)}
+                    className={cn(
+                      'w-16 h-16 rounded-2xl flex items-center justify-center flex-shrink-0 transition-all hover:scale-105',
+                      iconBgClass
+                    )}
+                    style={iconBgStyle}
+                  >
+                    <span className="text-3xl">{icon}</span>
+                  </button>
+                  <Input
+                    value={name}
+                    onChange={(e) => setName(e.target.value.slice(0, 50))}
+                    placeholder="事件名称"
+                    className="h-14 text-lg rounded-xl border-border/50 bg-muted/30 flex-1"
+                    maxLength={50}
+                  />
+                </div>
+
+                {/* Basic Settings Section */}
+                <div className="px-6 py-2">
+                  <h3 className="text-sm font-medium text-foreground mb-2">基本</h3>
+                  <div className="bg-muted/30 rounded-2xl overflow-hidden">
+                    {/* Event Type */}
+                    <button
+                      onClick={() => setTypePickerOpen(true)}
+                      className="w-full flex items-center justify-between p-4 hover:bg-muted/50 transition-colors"
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className="text-foreground">事件类型</span>
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Info className="w-4 h-4 text-muted-foreground" />
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>日常：可重复打卡<br/>一次性：只记录一次<br/>记录：需填写内容</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </div>
+                      <div className="flex items-center gap-1 text-muted-foreground">
+                        <span>{TYPE_OPTIONS.find(t => t.value === type)?.label}</span>
+                        <ChevronRight className="w-4 h-4" />
+                      </div>
+                    </button>
+
+                    <div className="h-px bg-border/50 mx-4" />
+
+                    {/* Quick Record */}
+                    <div className="w-full flex items-center justify-between p-4">
+                      <div className="flex items-center gap-2">
+                        <span className="text-foreground">快速记录</span>
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Info className="w-4 h-4 text-muted-foreground" />
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>开启后，点击图标立即记录</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </div>
+                      <Switch
+                        checked={quickRecord}
+                        onCheckedChange={(checked) => {
+                          setQuickRecord(checked);
+                          // Quick record doesn't support attributes
+                          if (checked) {
+                            setAttributes([]);
+                          }
+                        }}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Attributes Section */}
+                {!quickRecord && (
+                  <div className="px-6 py-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <h3 className="text-sm font-medium text-foreground">属性</h3>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Info className="w-4 h-4 text-muted-foreground" />
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>添加自定义字段，记录时可填写</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </div>
+                    <div className="bg-muted/30 rounded-2xl overflow-hidden">
+                      {/* Existing attributes */}
+                      {attributes.map((attr, index) => (
+                        <div key={attr.id}>
+                          {index > 0 && <div className="h-px bg-border/50 mx-4" />}
+                          <div className="flex items-center justify-between p-4">
+                            <span className="text-foreground">{attr.name}</span>
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm text-muted-foreground">{attr.type}</span>
+                              <button
+                                onClick={() => handleRemoveAttribute(attr.id)}
+                                className="w-8 h-8 rounded-full hover:bg-muted flex items-center justify-center"
+                              >
+                                <Trash2 className="w-4 h-4 text-muted-foreground" />
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                      
+                      {attributes.length > 0 && <div className="h-px bg-border/50 mx-4" />}
+                      
+                      {/* Add Attribute Button */}
+                      <button
+                        onClick={() => setAttributeTypePickerOpen(true)}
+                        className="w-full flex items-center justify-center gap-2 p-4 text-primary hover:bg-muted/50 transition-colors"
+                      >
+                        <Plus className="w-4 h-4" />
+                        <span>新增</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Back to templates link */}
+                <div className="px-6 py-4">
+                  <button 
+                    onClick={() => setViewMode('templates')}
+                    className="text-sm text-muted-foreground hover:text-foreground"
+                  >
+                    ← 返回预设模版
+                  </button>
+                </div>
+              </div>
+            </>
+          )}
+        </SheetContent>
+      </Sheet>
+
+      {/* Type Picker Sheet */}
+      <Sheet open={typePickerOpen} onOpenChange={setTypePickerOpen}>
+        <SheetContent side="bottom" className="rounded-t-3xl px-6 pb-8 pt-6">
+          <SheetHeader className="mb-4">
+            <div className="flex items-center justify-between">
+              <button 
+                onClick={() => setTypePickerOpen(false)}
+                className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-muted"
+              >
+                <X className="w-5 h-5 text-muted-foreground" />
+              </button>
+              <SheetTitle className="text-lg font-semibold">选择事件类型</SheetTitle>
+              <div className="w-8" />
+            </div>
+          </SheetHeader>
+          <div className="space-y-2">
+            {TYPE_OPTIONS.map((t) => (
+              <button
+                key={t.value}
+                onClick={() => {
+                  setType(t.value);
+                  setTypePickerOpen(false);
+                }}
+                className={cn(
+                  'w-full p-4 rounded-xl text-left transition-colors',
+                  type === t.value 
+                    ? 'bg-primary text-primary-foreground' 
+                    : 'bg-muted/50 hover:bg-muted'
+                )}
+              >
+                <div className="font-medium">{t.label}</div>
+                <div className={cn(
+                  'text-sm mt-0.5',
+                  type === t.value ? 'text-primary-foreground/80' : 'text-muted-foreground'
+                )}>
+                  {t.value === 'daily' && '可重复打卡'}
+                  {t.value === 'once' && '发生一次的事'}
+                  {t.value === 'log' && '需要填写内容'}
+                </div>
+              </button>
+            ))}
           </div>
-        )}
-      </SheetContent>
-    </Sheet>
+        </SheetContent>
+      </Sheet>
+
+      {/* Icon Picker */}
+      <IconPicker
+        open={iconPickerOpen}
+        onOpenChange={setIconPickerOpen}
+        icon={icon}
+        color={color}
+        onIconChange={setIcon}
+        onColorChange={setColor}
+      />
+
+      {/* Attribute Type Picker */}
+      <AttributeTypePicker
+        open={attributeTypePickerOpen}
+        onOpenChange={setAttributeTypePickerOpen}
+        onSelect={handleSelectAttributeType}
+      />
+
+      {/* Attribute Editor */}
+      <AttributeEditor
+        open={attributeEditorOpen}
+        onOpenChange={setAttributeEditorOpen}
+        type={editingAttributeType}
+        onSave={handleAddAttribute}
+      />
+    </>
   );
 };
