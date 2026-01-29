@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { Switch } from '@/components/ui/switch';
 import { X, Plus, Trash2 } from 'lucide-react';
 import type { AttributeType, EventAttribute, SelectOption } from '@/types';
 import * as storage from '@/lib/storage';
@@ -32,6 +33,7 @@ export const AttributeEditor = ({
   existingAttribute 
 }: AttributeEditorProps) => {
   const [name, setName] = useState(existingAttribute?.name || '');
+  const [required, setRequired] = useState(existingAttribute?.required || false);
   const [options, setOptions] = useState<SelectOption[]>(
     existingAttribute?.options || []
   );
@@ -56,6 +58,7 @@ export const AttributeEditor = ({
       id: existingAttribute?.id || storage.generateId(),
       name: name.trim(),
       type,
+      required,
       ...(needsOptions && { options }),
     };
     
@@ -64,6 +67,7 @@ export const AttributeEditor = ({
     
     // Reset form
     setName('');
+    setRequired(false);
     setOptions([]);
     setNewOption('');
   };
@@ -97,6 +101,18 @@ export const AttributeEditor = ({
               onChange={(e) => setName(e.target.value)}
               placeholder="例如：金额、心情、地点..."
               className="h-12 text-base rounded-xl"
+            />
+          </div>
+
+          {/* Required Toggle */}
+          <div className="flex items-center justify-between py-2">
+            <div>
+              <span className="text-sm font-medium text-foreground">必填</span>
+              <p className="text-xs text-muted-foreground mt-0.5">记录时必须填写此属性</p>
+            </div>
+            <Switch
+              checked={required}
+              onCheckedChange={setRequired}
             />
           </div>
 
