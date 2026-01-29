@@ -27,7 +27,7 @@ const Index = () => {
   const [recordSheetEvent, setRecordSheetEvent] = useState<Event | null>(null);
 
   const { events, addEvent, deleteEvent, getEventById } = useEvents();
-  const { records, addRecord, getLastRecordForEvent, getRecordsByDate } = useRecords();
+  const { records, addRecord, getLastRecordForEvent, getRecordsByDate, getTodayRecordCount } = useRecords();
 
   const handleQuickRecord = useCallback((eventId: string) => {
     const event = getEventById(eventId);
@@ -105,6 +105,7 @@ const Index = () => {
               <EventGrid
                 events={events}
                 getLastRecord={getLastRecordForEvent}
+                getTodayRecordCount={getTodayRecordCount}
                 onQuickRecord={handleQuickRecord}
                 onDeleteEvent={deleteEvent}
               />
