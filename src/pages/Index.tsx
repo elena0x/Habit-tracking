@@ -14,11 +14,9 @@ import { RecordInputSheet } from '@/components/RecordInputSheet';
 import Settings from '@/pages/Settings';
 import type { Event, EventType } from '@/types';
 import { getCurrentDate } from '@/lib/dateUtils';
-import { Search, Bell, Plus, Calendar, List } from 'lucide-react';
-
+import { Calendar, List } from 'lucide-react';
 type TabType = 'home' | 'calendar' | 'stats' | 'settings';
 type CalendarViewMode = 'calendar' | 'timeline';
-
 const Index = () => {
   const [activeTab, setActiveTab] = useState<TabType>('home');
   const [createSheetOpen, setCreateSheetOpen] = useState(false);
@@ -27,14 +25,23 @@ const Index = () => {
   const [recordSheetOpen, setRecordSheetOpen] = useState(false);
   const [recordSheetEvent, setRecordSheetEvent] = useState<Event | null>(null);
   const [calendarViewMode, setCalendarViewMode] = useState<CalendarViewMode>('calendar');
-
-  const { events, addEvent, deleteEvent, getEventById } = useEvents();
-  const { records, addRecord, getLastRecordForEvent, getRecordsByDate, getTodayRecordCount } = useRecords();
-
+  const {
+    events,
+    addEvent,
+    deleteEvent,
+    getEventById
+  } = useEvents();
+  const {
+    records,
+    addRecord,
+    getLastRecordForEvent,
+    getRecordsByDate,
+    getTodayRecordCount
+  } = useRecords();
   const handleQuickRecord = useCallback((eventId: string) => {
     const event = getEventById(eventId);
     if (!event) return;
-    
+
     // If event has attributes or is log type, show input sheet
     const hasAttributes = event.attributes && event.attributes.length > 0;
     if (hasAttributes || event.type === 'log') {
@@ -42,32 +49,37 @@ const Index = () => {
       setRecordSheetOpen(true);
       return;
     }
-    
+
     // For events without attributes, record immediately
     addRecord(eventId);
     setToastEvent(event);
   }, [addRecord, getEventById]);
-
-  const handleRecordConfirm = useCallback((eventId: string, data: { note?: string; extra?: Record<string, unknown> }) => {
-    addRecord(eventId, { note: data.note, extra: data.extra });
+  const handleRecordConfirm = useCallback((eventId: string, data: {
+    note?: string;
+    extra?: Record<string, unknown>;
+  }) => {
+    addRecord(eventId, {
+      note: data.note,
+      extra: data.extra
+    });
     const event = getEventById(eventId);
     if (event) {
       setToastEvent(event);
     }
   }, [addRecord, getEventById]);
-
-  const handleCreateEvent = useCallback((data: { name: string; type: EventType; icon: string; color: string }) => {
+  const handleCreateEvent = useCallback((data: {
+    name: string;
+    type: EventType;
+    icon: string;
+    color: string;
+  }) => {
     addEvent(data);
   }, [addEvent]);
-
   const handleDateSelect = useCallback((date: string) => {
     setSelectedDate(date);
   }, []);
-
   const selectedDateRecords = getRecordsByDate(selectedDate);
-
-  return (
-    <div className="min-h-screen bg-background pb-24">
+  return <div className="min-h-screen bg-background pb-24">
       {/* Header */}
       <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-lg border-b border-border/50">
         <div className="max-w-lg mx-auto px-5 py-4 flex items-center justify-between">
@@ -77,127 +89,51 @@ const Index = () => {
             {activeTab === 'stats' && '趋势'}
             {activeTab === 'settings' && '设置'}
           </h1>
-          {activeTab === 'home' && (
-            <div className="flex items-center gap-3">
-              <button className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-muted">
-                <Search className="w-5 h-5 text-muted-foreground" />
-              </button>
-              <button className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-muted">
-                <Bell className="w-5 h-5 text-muted-foreground" />
-              </button>
-              <button 
-                onClick={() => setCreateSheetOpen(true)}
-                className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-muted"
-              >
-                <Plus className="w-5 h-5 text-muted-foreground" />
-              </button>
-            </div>
-          )}
-          {activeTab === 'calendar' && (
-            <div className="flex items-center gap-1 bg-muted/50 rounded-full p-1">
-              <button
-                onClick={() => setCalendarViewMode('calendar')}
-                className={`p-2 rounded-full transition-colors ${
-                  calendarViewMode === 'calendar' 
-                    ? 'bg-background shadow-sm text-foreground' 
-                    : 'text-muted-foreground hover:text-foreground'
-                }`}
-              >
+          {activeTab === 'home'}
+          {activeTab === 'calendar' && <div className="flex items-center gap-1 bg-muted/50 rounded-full p-1">
+              <button onClick={() => setCalendarViewMode('calendar')} className={`p-2 rounded-full transition-colors ${calendarViewMode === 'calendar' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}`}>
                 <Calendar className="w-4 h-4" />
               </button>
-              <button
-                onClick={() => setCalendarViewMode('timeline')}
-                className={`p-2 rounded-full transition-colors ${
-                  calendarViewMode === 'timeline' 
-                    ? 'bg-background shadow-sm text-foreground' 
-                    : 'text-muted-foreground hover:text-foreground'
-                }`}
-              >
+              <button onClick={() => setCalendarViewMode('timeline')} className={`p-2 rounded-full transition-colors ${calendarViewMode === 'timeline' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}`}>
                 <List className="w-4 h-4" />
               </button>
-            </div>
-          )}
+            </div>}
         </div>
       </header>
 
       {/* Main Content */}
       <main className="max-w-lg mx-auto px-5 py-6">
         {/* Home Tab */}
-        {activeTab === 'home' && (
-          <>
-            {events.length === 0 ? (
-              <EmptyState onCreateFirst={() => setCreateSheetOpen(true)} />
-            ) : (
-              <EventGrid
-                events={events}
-                getLastRecord={getLastRecordForEvent}
-                getTodayRecordCount={getTodayRecordCount}
-                onQuickRecord={handleQuickRecord}
-                onDeleteEvent={deleteEvent}
-              />
-            )}
-          </>
-        )}
+        {activeTab === 'home' && <>
+            {events.length === 0 ? <EmptyState onCreateFirst={() => setCreateSheetOpen(true)} /> : <EventGrid events={events} getLastRecord={getLastRecordForEvent} getTodayRecordCount={getTodayRecordCount} onQuickRecord={handleQuickRecord} onDeleteEvent={deleteEvent} />}
+          </>}
 
         {/* Calendar Tab */}
-        {activeTab === 'calendar' && (
-          <>
-            {calendarViewMode === 'calendar' ? (
-              <CalendarView
-                records={records}
-                events={events}
-                onDateSelect={handleDateSelect}
-                selectedDate={selectedDate}
-              />
-            ) : (
-              <TimelineRecords
-                date={selectedDate}
-                records={records}
-                events={events}
-                showAllDates
-              />
-            )}
-          </>
-        )}
+        {activeTab === 'calendar' && <>
+            {calendarViewMode === 'calendar' ? <CalendarView records={records} events={events} onDateSelect={handleDateSelect} selectedDate={selectedDate} /> : <TimelineRecords date={selectedDate} records={records} events={events} showAllDates />}
+          </>}
 
         {/* Stats Tab */}
-        {activeTab === 'stats' && (
-          <EnhancedStatsView records={records} events={events} />
-        )}
+        {activeTab === 'stats' && <EnhancedStatsView records={records} events={events} />}
 
         {/* Settings Tab */}
-        {activeTab === 'settings' && (
-          <Settings />
-        )}
+        {activeTab === 'settings' && <Settings />}
       </main>
 
       {/* Floating Add Button - Only on Home */}
-      {activeTab === 'home' && (
-        <FloatingAddButton onClick={() => setCreateSheetOpen(true)} />
-      )}
+      {activeTab === 'home' && <FloatingAddButton onClick={() => setCreateSheetOpen(true)} />}
 
       {/* Bottom Navigation */}
       <BottomNav activeTab={activeTab} onTabChange={setActiveTab} />
 
       {/* Create Event Sheet */}
-      <CreateEventSheet
-        open={createSheetOpen}
-        onOpenChange={setCreateSheetOpen}
-        onSubmit={handleCreateEvent}
-      />
+      <CreateEventSheet open={createSheetOpen} onOpenChange={setCreateSheetOpen} onSubmit={handleCreateEvent} />
 
       {/* Record Toast */}
       <RecordToast event={toastEvent} onHide={() => setToastEvent(null)} />
 
       {/* Record Input Sheet for events with attributes */}
-      <RecordInputSheet
-        open={recordSheetOpen}
-        onOpenChange={setRecordSheetOpen}
-        event={recordSheetEvent}
-        onConfirm={handleRecordConfirm}
-      />
-    </div>
-  );
+      <RecordInputSheet open={recordSheetOpen} onOpenChange={setRecordSheetOpen} event={recordSheetEvent} onConfirm={handleRecordConfirm} />
+    </div>;
 };
-
 export default Index;
