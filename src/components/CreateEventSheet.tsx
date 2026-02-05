@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { X, ChevronRight, Plus, Info, Trash2 } from 'lucide-react';
+import { ChevronRight, Plus, Info, Trash2 } from 'lucide-react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -341,12 +341,12 @@ export const CreateEventSheet = ({ open, onOpenChange, onSubmit }: CreateEventSh
             <div className="flex items-center justify-between">
               <button 
                 onClick={() => setTypePickerOpen(false)}
-                className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-muted"
+                className="text-muted-foreground text-base"
               >
-                <X className="w-5 h-5 text-muted-foreground" />
+                取消
               </button>
               <SheetTitle className="text-lg font-semibold">选择事件类型</SheetTitle>
-              <div className="w-8" />
+              <div className="w-10" />
             </div>
           </SheetHeader>
           <div className="space-y-2">
