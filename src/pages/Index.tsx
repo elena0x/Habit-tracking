@@ -79,10 +79,10 @@ const Index = () => {
     setSelectedDate(date);
   }, []);
   const selectedDateRecords = getRecordsByDate(selectedDate);
-  return <div className="min-h-screen bg-background pb-24">
+  return <div className="min-h-screen bg-background" style={{ paddingBottom: 'calc(80px + env(safe-area-inset-bottom, 0px))' }}>
       {/* Header */}
-      <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-lg border-b border-border/50">
-        <div className="max-w-lg mx-auto px-5 py-4 flex items-center justify-between">
+      <header className="sticky top-0 z-40 bg-background/95 backdrop-blur-xl border-b border-border/50" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
+        <div className="max-w-lg mx-auto px-5 py-3 flex items-center justify-between">
           <h1 className="text-xl font-semibold">
             {activeTab === 'home' && '我的生活'}
             {activeTab === 'calendar' && '查看'}
