@@ -1,5 +1,5 @@
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
-import { Hash, Check, List, Type, ToggleLeft, Star, Clock, X } from 'lucide-react';
+import { Hash, Check, List, Type, ToggleLeft, Star, Clock } from 'lucide-react';
 import type { AttributeType } from '@/types';
 
 interface AttributeTypePickerProps {
@@ -26,12 +26,12 @@ export const AttributeTypePicker = ({ open, onOpenChange, onSelect }: AttributeT
           <div className="flex items-center justify-between">
             <button 
               onClick={() => onOpenChange(false)}
-              className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-muted"
+              className="text-muted-foreground text-base"
             >
-              <X className="w-5 h-5 text-muted-foreground" />
+              取消
             </button>
             <SheetTitle className="text-lg font-semibold">请您选择属性类型</SheetTitle>
-            <div className="w-8" />
+            <div className="w-10" />
           </div>
         </SheetHeader>
 

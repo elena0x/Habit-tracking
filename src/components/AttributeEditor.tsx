@@ -3,7 +3,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sh
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
-import { X, Plus, Trash2 } from 'lucide-react';
+import { Plus, Trash2 } from 'lucide-react';
 import type { AttributeType, EventAttribute, SelectOption } from '@/types';
 import * as storage from '@/lib/storage';
 
@@ -81,14 +81,14 @@ export const AttributeEditor = ({
           <div className="flex items-center justify-between">
             <button 
               onClick={() => onOpenChange(false)}
-              className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-muted"
+              className="text-muted-foreground text-base"
             >
-              <X className="w-5 h-5 text-muted-foreground" />
+              取消
             </button>
             <SheetTitle className="text-lg font-semibold">
               添加{TYPE_NAMES[type]}属性
             </SheetTitle>
-            <div className="w-8" />
+            <div className="w-10" />
           </div>
         </SheetHeader>
 
