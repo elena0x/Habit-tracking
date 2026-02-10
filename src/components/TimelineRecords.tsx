@@ -83,9 +83,9 @@ export const TimelineRecords = ({ date, records, events, showAllDates = false }:
             这一天没有记录
           </p>
         ) : (
-          <div className="relative ml-1">
-            {/* Timeline Line - positioned to go through dot centers */}
-            <div className="absolute left-[3px] top-0 bottom-0 w-0.5 bg-border" />
+          <div className="relative">
+            {/* Timeline Line - 1px wide, centered at 7px from left (center of 14px dot area) */}
+            <div className="absolute left-[6.5px] top-0 bottom-0 w-[1px] bg-border" />
             
             <div className="space-y-3">
               {sortedRecords.map((record) => {
@@ -113,14 +113,18 @@ export const TimelineRecords = ({ date, records, events, showAllDates = false }:
                 } : undefined;
                 
                 return (
-                  <div key={record.id} className="relative flex items-start gap-3 pl-5">
-                    {/* Timeline Dot - centered on the line */}
+                  <div key={record.id} className="relative flex items-start gap-3" style={{ paddingLeft: '22px' }}>
+                    {/* Timeline Dot - 8px wide, centered at 7px from left */}
                     <div 
                       className={cn(
-                        'absolute left-0 top-3 w-2 h-2 rounded-full',
+                        'absolute w-2 h-2 rounded-full',
                         dotClassName
                       )}
-                      style={customDotStyle}
+                      style={{
+                        left: '3px',
+                        top: '14px',
+                        ...customDotStyle
+                      }}
                     />
                     
                     {/* Time */}
