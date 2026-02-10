@@ -26,7 +26,7 @@ export const useRecords = () => {
     const newRecord: EventRecord = {
       id: storage.generateId(),
       eventId,
-      date: options?.date || getCurrentDate(),
+      date: options?.date || getBeijingDate(),
       time: options?.time || getCurrentTime(),
       note: options?.note,
       extra: options?.extra,
