@@ -125,6 +125,25 @@ export const EventGrid = ({ events, getLastRecord, getTodayRecordCount, onQuickR
 
           // Determine icon based on quickRecord status
           const isQuickRecord = event.quickRecord;
+
+          // Highlight button styles based on event color
+          const highlightBtnStyle = isCustomColor ? {
+            backgroundColor: colorInfo.hex,
+            color: '#fff',
+          } : undefined;
+
+          const presetHighlightClasses: { [key: string]: string } = {
+            amber: 'bg-amber-400 text-white shadow-md scale-110',
+            rose: 'bg-rose-400 text-white shadow-md scale-110',
+            emerald: 'bg-emerald-400 text-white shadow-md scale-110',
+            sky: 'bg-sky-400 text-white shadow-md scale-110',
+            violet: 'bg-violet-400 text-white shadow-md scale-110',
+            orange: 'bg-orange-400 text-white shadow-md scale-110',
+          };
+
+          const highlightBtnClass = hasRecordedToday
+            ? (isCustomColor ? 'shadow-md scale-110' : (presetHighlightClasses[event.color || 'sky'] || presetHighlightClasses.sky))
+            : 'bg-background/80 hover:bg-background hover:scale-105';
           
           return (
             <div
@@ -178,15 +197,14 @@ export const EventGrid = ({ events, getLastRecord, getTodayRecordCount, onQuickR
                 onClick={(e) => handleQuickRecordClick(e, event.id)}
                 className={cn(
                   'absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center transition-all',
-                  hasRecordedToday
-                    ? 'bg-primary text-primary-foreground shadow-md scale-110'
-                    : 'bg-background/80 hover:bg-background hover:scale-105'
+                  highlightBtnClass
                 )}
+                style={hasRecordedToday && isCustomColor ? highlightBtnStyle : undefined}
               >
                 {isQuickRecord ? (
                   <Zap className={cn(
                     'w-4 h-4 transition-all',
-                    hasRecordedToday ? 'fill-current' : 'text-primary'
+                    hasRecordedToday ? 'fill-current' : 'text-muted-foreground'
                   )} />
                 ) : (
                   <Plus className={cn(
