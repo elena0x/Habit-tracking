@@ -42,6 +42,13 @@ const Index = () => {
     const event = getEventById(eventId);
     if (!event) return;
 
+    // Quick record events always record immediately, skip attribute input
+    if (event.quickRecord) {
+      addRecord(eventId);
+      setToastEvent(event);
+      return;
+    }
+
     // If event has attributes or is log type, show input sheet
     const hasAttributes = event.attributes && event.attributes.length > 0;
     if (hasAttributes || event.type === 'log') {
