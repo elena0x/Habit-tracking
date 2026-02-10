@@ -212,10 +212,11 @@ const EventDetailPage = () => {
               还没有记录
             </p>
           ) : (
-            <div className="relative pl-6 space-y-4 max-h-[400px] overflow-y-auto">
-              {/* Timeline Line */}
-              <div className="absolute left-2 top-0 bottom-0 w-px bg-border" />
+            <div className="relative max-h-[400px] overflow-y-auto" style={{ paddingLeft: '20px' }}>
+              {/* Timeline Line - centered at 5px from left (center of 10px dot) */}
+              <div className="absolute top-0 bottom-0 w-[1px] bg-border" style={{ left: '4.5px' }} />
               
+              <div className="space-y-4">
               {sortedRecords.slice(0, 50).map((record) => {
                 const recordDate = parseISO(record.date);
                 const displayDate = format(recordDate, 'MM月dd日', { locale: zhCN });
@@ -223,13 +224,13 @@ const EventDetailPage = () => {
                 
                 return (
                   <div key={record.id} className="relative">
-                    {/* Timeline Dot */}
+                    {/* Timeline Dot - 10px wide, left edge at 0px, center at 5px = line center */}
                     <div 
                       className={cn(
-                        'absolute -left-4 top-1 w-2.5 h-2.5 rounded-full border-2 border-background',
+                        'absolute w-2.5 h-2.5 rounded-full border-2 border-background',
                         !isCustomColor && colors.accent
                       )}
-                      style={customAccentStyle}
+                      style={{ left: '-20px', top: '6px', ...customAccentStyle }}
                     />
                     
                     <div className="bg-background rounded-xl p-3">
@@ -252,6 +253,7 @@ const EventDetailPage = () => {
                   仅显示最近50条记录
                 </p>
               )}
+              </div>
             </div>
           )}
         </div>
