@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, TrendingUp, Calendar, Clock, FileText, Pencil } from 'lucide-react';
 import { format, parseISO, startOfMonth, eachDayOfInterval, subMonths } from 'date-fns';
@@ -26,6 +26,24 @@ const EventDetailPage = () => {
   const { getEventById, updateEvent } = useEvents();
   const { records, getRecordsByEvent } = useRecords();
   const [editSheetOpen, setEditSheetOpen] = useState(false);
+
+  // Swipe-back gesture
+  const touchStartRef = useRef<{ x: number; y: number } | null>(null);
+  const handleSwipeStart = useCallback((e: React.TouchEvent) => {
+    // Only trigger from left edge (within 30px)
+    if (e.touches[0].clientX < 30) {
+      touchStartRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+    }
+  }, []);
+  const handleSwipeEnd = useCallback((e: React.TouchEvent) => {
+    if (!touchStartRef.current) return;
+    const deltaX = e.changedTouches[0].clientX - touchStartRef.current.x;
+    const deltaY = e.changedTouches[0].clientY - touchStartRef.current.y;
+    touchStartRef.current = null;
+    if (deltaX > 80 && Math.abs(deltaX) > Math.abs(deltaY) * 2) {
+      navigate(-1);
+    }
+  }, [navigate]);
 
   const event = eventId ? getEventById(eventId) : null;
   const eventRecords = eventId ? getRecordsByEvent(eventId) : [];
@@ -102,7 +120,7 @@ const EventDetailPage = () => {
   const customAccentStyle = isCustomColor ? { backgroundColor: colorInfo.hex } : undefined;
 
   return (
-    <div className="min-h-screen bg-background pb-8">
+    <div className="min-h-screen bg-background pb-8" onTouchStart={handleSwipeStart} onTouchEnd={handleSwipeEnd}>
       {/* Header */}
       <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-lg border-b border-border/50">
         <div className="max-w-lg mx-auto px-5 py-4 flex items-center gap-3">
