@@ -73,15 +73,10 @@ export const EventGrid = ({ events, getLastRecord, getTodayRecordCount, onQuickR
 
   const handleCardClick = useCallback((event: Event) => {
     if (!isLongPressRef.current) {
-      // If quick record is enabled, record immediately instead of navigating
-      if (event.quickRecord) {
-        onQuickRecord(event.id);
-      } else {
-        navigate(`/event/${event.id}`);
-      }
+      navigate(`/event/${event.id}`);
     }
     isLongPressRef.current = false;
-  }, [navigate, onQuickRecord]);
+  }, [navigate]);
 
   const handleQuickRecordClick = useCallback((e: React.MouseEvent, eventId: string) => {
     e.stopPropagation();
@@ -184,7 +179,7 @@ export const EventGrid = ({ events, getLastRecord, getTodayRecordCount, onQuickR
                 className={cn(
                   'absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center transition-all',
                   hasRecordedToday
-                    ? 'bg-primary text-primary-foreground shadow-md scale-110 animate-pulse'
+                    ? 'bg-primary text-primary-foreground shadow-md scale-110'
                     : 'bg-background/80 hover:bg-background hover:scale-105'
                 )}
               >
