@@ -2,6 +2,7 @@ import { useState, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { getColorClasses, hexToRgba } from '@/lib/colorUtils';
+import { useHaptics } from '@/hooks/useHaptics';
 import { Zap, Plus, Trash2 } from 'lucide-react';
 import type { Event, EventRecord } from '@/types';
 import { formatRelativeTime, isRecordedToday } from '@/lib/dateUtils';
@@ -47,6 +48,7 @@ const presetIconBgClasses: { [key: string]: string } = {
 
 export const EventGrid = ({ events, getLastRecord, getTodayRecordCount, onQuickRecord, onDeleteEvent }: EventGridProps) => {
   const navigate = useNavigate();
+  const haptics = useHaptics();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [eventToDelete, setEventToDelete] = useState<Event | null>(null);
   const longPressTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -58,11 +60,9 @@ export const EventGrid = ({ events, getLastRecord, getTodayRecordCount, onQuickR
       isLongPressRef.current = true;
       setEventToDelete(event);
       setDeleteDialogOpen(true);
-      if (navigator.vibrate) {
-        navigator.vibrate(50);
-      }
+      haptics.warning();
     }, LONG_PRESS_DURATION);
-  }, []);
+  }, [haptics]);
 
   const handleTouchEnd = useCallback(() => {
     if (longPressTimerRef.current) {

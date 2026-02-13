@@ -1,6 +1,8 @@
 import { useState, useCallback } from 'react';
 import { useEvents } from '@/hooks/useEvents';
 import { useRecords } from '@/hooks/useRecords';
+import { useHaptics } from '@/hooks/useHaptics';
+import { useNativeApp } from '@/hooks/useNativeApp';
 import { EventGrid } from '@/components/EventGrid';
 import { CreateEventSheet } from '@/components/CreateEventSheet';
 import { CalendarView } from '@/components/CalendarView';
@@ -18,6 +20,8 @@ import { Calendar, List } from 'lucide-react';
 type TabType = 'home' | 'calendar' | 'stats' | 'settings';
 type CalendarViewMode = 'calendar' | 'timeline';
 const Index = () => {
+  useNativeApp();
+  const haptics = useHaptics();
   const [activeTab, setActiveTab] = useState<TabType>('home');
   const [createSheetOpen, setCreateSheetOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState<string>(getCurrentDate());
@@ -46,6 +50,7 @@ const Index = () => {
     if (event.quickRecord) {
       addRecord(eventId);
       setToastEvent(event);
+      haptics.success();
       return;
     }
 
@@ -54,13 +59,15 @@ const Index = () => {
     if (hasAttributes || event.type === 'log') {
       setRecordSheetEvent(event);
       setRecordSheetOpen(true);
+      haptics.lightTap();
       return;
     }
 
     // For events without attributes, record immediately
     addRecord(eventId);
     setToastEvent(event);
-  }, [addRecord, getEventById]);
+    haptics.success();
+  }, [addRecord, getEventById, haptics]);
   const handleRecordConfirm = useCallback((eventId: string, data: {
     note?: string;
     extra?: Record<string, unknown>;

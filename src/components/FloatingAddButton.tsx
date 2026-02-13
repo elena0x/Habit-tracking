@@ -1,14 +1,22 @@
 import { Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useHaptics } from '@/hooks/useHaptics';
 
 interface FloatingAddButtonProps {
   onClick: () => void;
 }
 
 export const FloatingAddButton = ({ onClick }: FloatingAddButtonProps) => {
+  const haptics = useHaptics();
+
+  const handleClick = () => {
+    haptics.mediumTap();
+    onClick();
+  };
+
   return (
     <button
-      onClick={onClick}
+      onClick={handleClick}
       className={cn(
         'fixed right-5 z-50',
         'w-14 h-14 rounded-full',
