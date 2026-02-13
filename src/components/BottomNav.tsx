@@ -1,5 +1,6 @@
 import { Home, Calendar, BarChart3, Settings } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useHaptics } from '@/hooks/useHaptics';
 
 type TabType = 'home' | 'calendar' | 'stats' | 'settings';
 
@@ -16,6 +17,15 @@ const tabs = [
 ];
 
 export const BottomNav = ({ activeTab, onTabChange }: BottomNavProps) => {
+  const haptics = useHaptics();
+
+  const handleTabChange = (tab: TabType) => {
+    if (tab !== activeTab) {
+      haptics.selectionTap();
+    }
+    onTabChange(tab);
+  };
+
   return (
     <nav className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-xl border-t border-border/50 px-4" style={{ paddingBottom: 'max(env(safe-area-inset-bottom), 8px)' }}>
       <div className="max-w-lg mx-auto flex justify-around py-2.5">
@@ -26,7 +36,7 @@ export const BottomNav = ({ activeTab, onTabChange }: BottomNavProps) => {
           return (
             <button
               key={tab.id}
-              onClick={() => onTabChange(tab.id)}
+              onClick={() => handleTabChange(tab.id)}
               className={cn(
                 'flex flex-col items-center gap-1 py-2 px-4 rounded-xl transition-all',
                 isActive ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
