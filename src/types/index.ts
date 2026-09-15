@@ -10,7 +10,7 @@ export interface SelectOption {
 }
 
 export interface AttributeConfig {
-  unit?: string; // For number type (e.g., '分钟', '公斤')
+  unit?: string; // For number type (e.g., 'min', 'kg')
   max?: number; // For rating type
   options?: string[]; // For single_select and multi_select
 }

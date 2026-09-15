@@ -98,17 +98,17 @@ const Index = () => {
       <header className="sticky top-0 z-40 bg-background/95 backdrop-blur-xl border-b border-border/50" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
         <div className="max-w-lg mx-auto px-5 py-3 flex items-center justify-between">
           <h1 className="text-xl font-semibold">
-            {activeTab === 'home' && '我的生活'}
-            {activeTab === 'calendar' && '查看'}
-            {activeTab === 'stats' && '趋势'}
-            {activeTab === 'settings' && '设置'}
+            {activeTab === 'home' && 'My habits'}
+            {activeTab === 'calendar' && 'Activity'}
+            {activeTab === 'stats' && 'Insights'}
+            {activeTab === 'settings' && 'Settings'}
           </h1>
           {activeTab === 'home'}
           {activeTab === 'calendar' && <div className="flex items-center gap-1 bg-muted/50 rounded-full p-1">
-              <button onClick={() => setCalendarViewMode('calendar')} className={`p-2 rounded-full transition-colors ${calendarViewMode === 'calendar' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}`}>
+              <button aria-label="Calendar view" onClick={() => setCalendarViewMode('calendar')} className={`p-2 rounded-full transition-colors ${calendarViewMode === 'calendar' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}`}>
                 <Calendar className="w-4 h-4" />
               </button>
-              <button onClick={() => setCalendarViewMode('timeline')} className={`p-2 rounded-full transition-colors ${calendarViewMode === 'timeline' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}`}>
+              <button aria-label="Timeline view" onClick={() => setCalendarViewMode('timeline')} className={`p-2 rounded-full transition-colors ${calendarViewMode === 'timeline' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}`}>
                 <List className="w-4 h-4" />
               </button>
             </div>}

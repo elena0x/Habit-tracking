@@ -18,15 +18,13 @@ export const Settings = () => {
   const [exportSuccess, setExportSuccess] = useState(false);
 
   const handleExport = () => {
-    const events = storage.getEvents();
-    const records = storage.getRecords();
-    const data = { events, records, exportedAt: new Date().toISOString() };
+    const data = storage.exportBackup();
     
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `life-record-backup-${new Date().toISOString().split('T')[0]}.json`;
+    a.download = `habitflow-backup-${new Date().toISOString().split('T')[0]}.json`;
     a.click();
     URL.revokeObjectURL(url);
     
@@ -35,23 +33,22 @@ export const Settings = () => {
   };
 
   const handleClearData = () => {
-    localStorage.removeItem('life-record-events');
-    localStorage.removeItem('life-record-records');
+    storage.clearAllData();
     window.location.reload();
   };
 
   const menuItems = [
     {
       icon: Download,
-      label: '导出数据',
-      description: '导出为 JSON 文件',
+      label: 'Export data',
+      description: 'Download a portable JSON backup',
       onClick: handleExport,
       showSuccess: exportSuccess,
     },
     {
       icon: Upload,
-      label: '导入数据',
-      description: '从备份文件恢复',
+      label: 'Import data',
+      description: 'Restore from a HabitFlow backup',
       onClick: () => {
         const input = document.createElement('input');
         input.type = 'file';
@@ -63,13 +60,10 @@ export const Settings = () => {
             reader.onload = (event) => {
               try {
                 const data = JSON.parse(event.target?.result as string);
-                if (data.events && data.records) {
-                  localStorage.setItem('life-record-events', JSON.stringify(data.events));
-                  localStorage.setItem('life-record-records', JSON.stringify(data.records));
-                  window.location.reload();
-                }
+                storage.importBackup(data);
+                window.location.reload();
               } catch (err) {
-                alert('导入失败，文件格式不正确');
+                alert('Import failed. Please choose a valid HabitFlow backup.');
               }
             };
             reader.readAsText(file);
@@ -103,7 +97,7 @@ export const Settings = () => {
                 <p className="text-sm text-muted-foreground">{item.description}</p>
               </div>
               {item.showSuccess ? (
-                <span className="text-sm text-emerald-500">已导出 ✓</span>
+                <span className="text-sm text-emerald-500">Exported ✓</span>
               ) : (
                 <ChevronRight className="w-5 h-5 text-muted-foreground" />
               )}
@@ -121,23 +115,23 @@ export const Settings = () => {
                 <Trash2 className="w-5 h-5 text-rose-500" />
               </div>
               <div className="flex-1 text-left">
-                <p className="font-medium text-rose-500">清除所有数据</p>
-                <p className="text-sm text-muted-foreground">删除所有事件和记录</p>
+                <p className="font-medium text-rose-500">Clear all data</p>
+                <p className="text-sm text-muted-foreground">Delete every habit and check-in</p>
               </div>
               <ChevronRight className="w-5 h-5 text-muted-foreground" />
             </button>
           </AlertDialogTrigger>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>确定要清除所有数据吗？</AlertDialogTitle>
+              <AlertDialogTitle>Clear all HabitFlow data?</AlertDialogTitle>
               <AlertDialogDescription>
-                此操作无法撤销。所有事件和记录都将被永久删除。
+                This cannot be undone. Every habit and check-in stored on this device will be deleted.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel>取消</AlertDialogCancel>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
               <AlertDialogAction onClick={handleClearData} className="bg-rose-500 hover:bg-rose-600">
-                确认删除
+                Delete everything
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
@@ -151,12 +145,12 @@ export const Settings = () => {
             <Info className="w-5 h-5 text-primary" />
           </div>
           <div>
-            <p className="font-medium">生活记录</p>
-            <p className="text-sm text-muted-foreground">Version 1.0.0</p>
+            <p className="font-medium">HabitFlow</p>
+            <p className="text-sm text-muted-foreground">Version 1.0.0 · Local-first</p>
           </div>
         </div>
         <p className="text-sm text-muted-foreground">
-          记录下来的时光，就不会悄悄溜走。
+          Small check-ins make meaningful patterns visible.
         </p>
       </div>
     </div>

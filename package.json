@@ -1,24 +1,44 @@
 {
-  "name": "vite_react_shadcn_ts",
+  "name": "habitflow",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
+  "description": "A privacy-first habit and life tracker for the web, iOS, and Android.",
+  "author": "Elena (@elena0x)",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/elena0x/elena-habit-tracking.git"
+  },
+  "homepage": "https://github.com/elena0x/elena-habit-tracking#readme",
+  "keywords": [
+    "habit-tracker",
+    "local-first",
+    "react",
+    "typescript",
+    "capacitor"
+  ],
+  "engines": {
+    "node": ">=22.12"
+  },
+  "overrides": {
+    "uuid": "11.1.1"
+  },
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "build:dev": "vite build --mode development",
+    "typecheck": "tsc --noEmit",
+    "audit:prod": "npm audit --omit=dev",
+    "check": "npm run typecheck && npm run lint && npm run test && npm run build && npm run audit:prod",
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@capacitor/android": "^8.0.2",
     "@capacitor/app": "^8.0.1",
-    "@capacitor/cli": "^8.0.2",
     "@capacitor/core": "^8.0.2",
     "@capacitor/haptics": "^8.0.0",
-    "@capacitor/ios": "^8.0.2",
     "@capacitor/keyboard": "^8.0.0",
     "@capacitor/local-notifications": "^8.0.1",
     "@capacitor/splash-screen": "^8.0.1",
@@ -51,8 +71,6 @@
     "@radix-ui/react-toggle": "^1.1.9",
     "@radix-ui/react-toggle-group": "^1.1.10",
     "@radix-ui/react-tooltip": "^1.2.7",
-    "@supabase/supabase-js": "^2.95.0",
-    "@tanstack/react-query": "^5.83.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
@@ -66,7 +84,7 @@
     "react-dom": "^18.3.1",
     "react-hook-form": "^7.61.1",
     "react-resizable-panels": "^2.1.9",
-    "react-router-dom": "^6.30.1",
+    "react-router-dom": "^7.18.3",
     "recharts": "^2.15.4",
     "sonner": "^1.7.4",
     "tailwind-merge": "^2.6.0",
@@ -75,6 +93,9 @@
     "zod": "^3.25.76"
   },
   "devDependencies": {
+    "@capacitor/android": "^8.5.2",
+    "@capacitor/cli": "^8.5.2",
+    "@capacitor/ios": "^8.5.2",
     "@eslint/js": "^9.32.0",
     "@tailwindcss/typography": "^0.5.16",
     "@testing-library/jest-dom": "^6.6.0",
@@ -82,19 +103,18 @@
     "@types/node": "^22.16.5",
     "@types/react": "^18.3.23",
     "@types/react-dom": "^18.3.7",
-    "@vitejs/plugin-react-swc": "^3.11.0",
+    "@vitejs/plugin-react": "^6.1.1",
     "autoprefixer": "^10.4.21",
     "eslint": "^9.32.0",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.20",
     "globals": "^15.15.0",
-    "jsdom": "^20.0.3",
-    "lovable-tagger": "^1.1.13",
+    "jsdom": "^29.1.1",
     "postcss": "^8.5.6",
     "tailwindcss": "^3.4.17",
-    "typescript": "^5.8.3",
+    "typescript": "^5.9.3",
     "typescript-eslint": "^8.38.0",
-    "vite": "^5.4.19",
-    "vitest": "^3.2.4"
+    "vite": "^8.3.0",
+    "vitest": "^5.0.0"
   }
 }

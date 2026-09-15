@@ -9,13 +9,13 @@ interface AttributeTypePickerProps {
 }
 
 const ATTRIBUTE_TYPES: { type: AttributeType; name: string; desc: string; icon: React.ReactNode }[] = [
-  { type: 'number', name: '数值类型', desc: '可以用来追踪价格、重量等数值', icon: <Hash className="w-5 h-5" /> },
-  { type: 'single_select', name: '单选类型', desc: '从预设的选项中单选', icon: <Check className="w-5 h-5" /> },
-  { type: 'multi_select', name: '多选类型', desc: '从预设的选项中多选', icon: <List className="w-5 h-5" /> },
-  { type: 'text', name: '文本类型', desc: '文本内容，可以是地点、人名', icon: <Type className="w-5 h-5" /> },
-  { type: 'toggle', name: '开关类型', desc: '轻松设置为是或否', icon: <ToggleLeft className="w-5 h-5" /> },
-  { type: 'rating', name: '评分类型', desc: '用于给美食、电影评分', icon: <Star className="w-5 h-5" /> },
-  { type: 'time', name: '时间类型', desc: '可以用来记录一个时间点', icon: <Clock className="w-5 h-5" /> },
+  { type: 'number', name: 'Number', desc: 'Track values such as price, distance, or weight', icon: <Hash className="w-5 h-5" /> },
+  { type: 'single_select', name: 'Single select', desc: 'Choose one item from a list of options', icon: <Check className="w-5 h-5" /> },
+  { type: 'multi_select', name: 'Multi-select', desc: 'Choose several items from a list of options', icon: <List className="w-5 h-5" /> },
+  { type: 'text', name: 'Text', desc: 'Capture context such as a place or person', icon: <Type className="w-5 h-5" /> },
+  { type: 'toggle', name: 'Yes / no', desc: 'Record a simple boolean answer', icon: <ToggleLeft className="w-5 h-5" /> },
+  { type: 'rating', name: 'Rating', desc: 'Rate a meal, movie, mood, or experience', icon: <Star className="w-5 h-5" /> },
+  { type: 'time', name: 'Time', desc: 'Capture a specific time of day', icon: <Clock className="w-5 h-5" /> },
 ];
 
 export const AttributeTypePicker = ({ open, onOpenChange, onSelect }: AttributeTypePickerProps) => {
@@ -28,9 +28,9 @@ export const AttributeTypePicker = ({ open, onOpenChange, onSelect }: AttributeT
               onClick={() => onOpenChange(false)}
               className="text-muted-foreground text-base"
             >
-              取消
+              Cancel
             </button>
-            <SheetTitle className="text-lg font-semibold">请您选择属性类型</SheetTitle>
+            <SheetTitle className="text-lg font-semibold">Choose a field type</SheetTitle>
             <div className="w-10" />
           </div>
         </SheetHeader>

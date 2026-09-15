@@ -1,5 +1,5 @@
 import { format, formatDistanceToNow, parseISO, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isToday } from 'date-fns';
-import { zhCN } from 'date-fns/locale';
+import { enUS } from 'date-fns/locale';
 
 export const formatDate = (date: string | Date): string => {
   const d = typeof date === 'string' ? parseISO(date) : date;
@@ -11,15 +11,15 @@ export const formatTime = (date: Date): string => {
 };
 
 export const formatDisplayDate = (date: string): string => {
-  return format(parseISO(date), 'M月d日', { locale: zhCN });
+  return format(parseISO(date), 'MMM d', { locale: enUS });
 };
 
 export const formatRelativeTime = (date: string): string => {
-  return formatDistanceToNow(parseISO(date), { addSuffix: true, locale: zhCN });
+  return formatDistanceToNow(parseISO(date), { addSuffix: true, locale: enUS });
 };
 
 export const formatMonth = (date: Date): string => {
-  return format(date, 'yyyy年M月', { locale: zhCN });
+  return format(date, 'MMMM yyyy', { locale: enUS });
 };
 
 export const formatYearMonth = (date: Date): string => {
@@ -42,7 +42,7 @@ export const isTodayDate = (date: Date): boolean => {
 };
 
 export const getWeekDays = (): string[] => {
-  return ['日', '一', '二', '三', '四', '五', '六'];
+  return ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 };
 
 export const getCurrentDate = (): string => {
@@ -53,15 +53,12 @@ export const getCurrentTime = (): string => {
   return formatTime(new Date());
 };
 
-// Get current date in Beijing timezone (UTC+8)
-export const getBeijingDate = (): string => {
-  const now = new Date();
-  // Convert to Beijing time by adding 8 hours offset
-  const beijingTime = new Date(now.getTime() + (8 * 60 * 60 * 1000) - (now.getTimezoneOffset() * 60 * 1000));
-  return format(beijingTime, 'yyyy-MM-dd');
+// Use the device's calendar date so a check-in never lands on the wrong day abroad.
+export const getLocalDate = (): string => {
+  return formatDate(new Date());
 };
 
-// Check if a record date matches today in Beijing timezone
+// Check if a record date matches today in the device's timezone.
 export const isRecordedToday = (recordDate: string): boolean => {
-  return recordDate === getBeijingDate();
+  return recordDate === getLocalDate();
 };

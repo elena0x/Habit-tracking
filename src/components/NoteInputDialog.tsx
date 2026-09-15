@@ -59,7 +59,7 @@ export const NoteInputDialog = ({
         
         <div className="py-2">
           <Textarea
-            placeholder="记录一些内容... (可选)"
+            placeholder="Add a note... (optional)"
             value={note}
             onChange={(e) => setNote(e.target.value.slice(0, 500))}
             className="min-h-[120px] resize-none rounded-xl border-muted focus-visible:ring-primary"
@@ -76,14 +76,14 @@ export const NoteInputDialog = ({
             onClick={handleCancel}
             className="flex-1 rounded-xl"
           >
-            取消
+            Cancel
           </Button>
           <Button
             onClick={handleConfirm}
             className="flex-1 rounded-xl bg-primary hover:bg-primary/90"
           >
             <Pencil className="w-4 h-4 mr-1" />
-            记录
+            Log it
           </Button>
         </DialogFooter>
       </DialogContent>

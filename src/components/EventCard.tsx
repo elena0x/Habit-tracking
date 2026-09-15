@@ -39,7 +39,7 @@ export const EventCard = ({ event, lastRecord, onQuickRecord }: EventCardProps) 
           {event.name}
         </h3>
         <p className="text-sm text-muted-foreground mt-0.5">
-          {lastRecord ? formatRelativeTime(lastRecord.createdAt) : '还没有记录'}
+          {lastRecord ? formatRelativeTime(lastRecord.createdAt) : 'No check-ins yet'}
         </p>
       </div>
       <div className="flex-shrink-0 w-8 h-8 rounded-full bg-background/50 flex items-center justify-center">

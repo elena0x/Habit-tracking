@@ -31,9 +31,9 @@ interface EditEventSheetProps {
 }
 
 const TYPE_OPTIONS: { value: EventType; label: string }[] = [
-  { value: 'daily', label: '日常' },
-  { value: 'once', label: '一次性' },
-  { value: 'log', label: '记录' },
+  { value: 'daily', label: 'Repeatable' },
+  { value: 'once', label: 'One-time' },
+  { value: 'log', label: 'Detailed log' },
 ];
 
 export const EditEventSheet = ({ open, onOpenChange, event, onSubmit }: EditEventSheetProps) => {
@@ -113,9 +113,9 @@ export const EditEventSheet = ({ open, onOpenChange, event, onSubmit }: EditEven
                 onClick={() => handleOpenChange(false)}
                 className="text-muted-foreground text-base"
               >
-                取消
+                Cancel
               </button>
-              <SheetTitle className="text-lg font-semibold">编辑事件</SheetTitle>
+              <SheetTitle className="text-lg font-semibold">Edit habit</SheetTitle>
               <button 
                 onClick={handleSubmit}
                 disabled={!name.trim()}
@@ -124,7 +124,7 @@ export const EditEventSheet = ({ open, onOpenChange, event, onSubmit }: EditEven
                   name.trim() ? "text-primary" : "text-muted-foreground"
                 )}
               >
-                保存
+                Save
               </button>
             </div>
           </SheetHeader>
@@ -145,7 +145,7 @@ export const EditEventSheet = ({ open, onOpenChange, event, onSubmit }: EditEven
               <Input
                 value={name}
                 onChange={(e) => setName(e.target.value.slice(0, 50))}
-                placeholder="事件名称"
+                placeholder="Habit name"
                 className="h-14 text-lg rounded-xl border-border/50 bg-muted/30 flex-1"
                 maxLength={50}
               />
@@ -153,7 +153,7 @@ export const EditEventSheet = ({ open, onOpenChange, event, onSubmit }: EditEven
 
             {/* Basic Settings Section */}
             <div className="px-6 py-2">
-              <h3 className="text-sm font-medium text-foreground mb-2">基本</h3>
+              <h3 className="text-sm font-medium text-foreground mb-2">Basics</h3>
               <div className="bg-muted/30 rounded-2xl overflow-hidden">
                 {/* Event Type */}
                 <button
@@ -161,14 +161,14 @@ export const EditEventSheet = ({ open, onOpenChange, event, onSubmit }: EditEven
                   className="w-full flex items-center justify-between p-4 hover:bg-muted/50 transition-colors"
                 >
                   <div className="flex items-center gap-2">
-                    <span className="text-foreground">事件类型</span>
+                    <span className="text-foreground">Tracking type</span>
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <Info className="w-4 h-4 text-muted-foreground" />
                         </TooltipTrigger>
                         <TooltipContent>
-                          <p>日常：可重复打卡<br/>一次性：只记录一次<br/>记录：需填写内容</p>
+                          <p>Repeatable: check in anytime<br/>One-time: capture a single event<br/>Detailed log: add context and fields</p>
                         </TooltipContent>
                       </Tooltip>
                     </TooltipProvider>
@@ -184,14 +184,14 @@ export const EditEventSheet = ({ open, onOpenChange, event, onSubmit }: EditEven
                 {/* Quick Record */}
                 <div className="w-full flex items-center justify-between p-4">
                   <div className="flex items-center gap-2">
-                    <span className="text-foreground">快速记录</span>
+                    <span className="text-foreground">Quick check-in</span>
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <Info className="w-4 h-4 text-muted-foreground" />
                         </TooltipTrigger>
                         <TooltipContent>
-                          <p>开启后，点击图标立即记录</p>
+                          <p>Tap the icon to check in instantly</p>
                         </TooltipContent>
                       </Tooltip>
                     </TooltipProvider>
@@ -213,14 +213,14 @@ export const EditEventSheet = ({ open, onOpenChange, event, onSubmit }: EditEven
             {!quickRecord && (
               <div className="px-6 py-4">
                 <div className="flex items-center gap-2 mb-2">
-                  <h3 className="text-sm font-medium text-foreground">属性</h3>
+                  <h3 className="text-sm font-medium text-foreground">Custom fields</h3>
                   <TooltipProvider>
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <Info className="w-4 h-4 text-muted-foreground" />
                       </TooltipTrigger>
                       <TooltipContent>
-                        <p>添加自定义字段，记录时可填写</p>
+                        <p>Capture structured details with each check-in</p>
                       </TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
@@ -251,7 +251,7 @@ export const EditEventSheet = ({ open, onOpenChange, event, onSubmit }: EditEven
                     className="w-full flex items-center justify-center gap-2 p-4 text-primary hover:bg-muted/50 transition-colors"
                   >
                     <Plus className="w-4 h-4" />
-                    <span>新增</span>
+                    <span>Add field</span>
                   </button>
                 </div>
               </div>
@@ -269,9 +269,9 @@ export const EditEventSheet = ({ open, onOpenChange, event, onSubmit }: EditEven
                 onClick={() => setTypePickerOpen(false)}
                 className="text-muted-foreground text-base"
               >
-                取消
+                Cancel
               </button>
-              <SheetTitle className="text-lg font-semibold">选择事件类型</SheetTitle>
+              <SheetTitle className="text-lg font-semibold">Choose a tracking type</SheetTitle>
               <div className="w-10" />
             </div>
           </SheetHeader>
@@ -295,9 +295,9 @@ export const EditEventSheet = ({ open, onOpenChange, event, onSubmit }: EditEven
                   'text-sm mt-0.5',
                   type === t.value ? 'text-primary-foreground/80' : 'text-muted-foreground'
                 )}>
-                  {t.value === 'daily' && '可重复打卡'}
-                  {t.value === 'once' && '发生一次的事'}
-                  {t.value === 'log' && '需要填写内容'}
+                  {t.value === 'daily' && 'Check in as often as you like'}
+                  {t.value === 'once' && 'Capture something that happens once'}
+                  {t.value === 'log' && 'Add notes and structured details'}
                 </div>
               </button>
             ))}

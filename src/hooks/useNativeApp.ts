@@ -16,18 +16,24 @@ export const useNativeApp = () => {
       try {
         await StatusBar.setStyle({ style: Style.Light });
         await StatusBar.setOverlaysWebView({ overlay: true });
-      } catch {}
+      } catch {
+        // Continue when a native capability is unavailable.
+      }
 
       // Keyboard - resize behavior
       try {
         await Keyboard.setResizeMode({ mode: KeyboardResize.Body });
         await Keyboard.setScroll({ isDisabled: false });
-      } catch {}
+      } catch {
+        // Continue when a native capability is unavailable.
+      }
 
       // Hide splash screen after app is ready
       try {
         await SplashScreen.hide({ fadeOutDuration: 300 });
-      } catch {}
+      } catch {
+        // Continue when a native capability is unavailable.
+      }
     };
 
     initNative();

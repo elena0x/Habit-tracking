@@ -187,8 +187,8 @@ export const EventGrid = ({ events, getLastRecord, getTodayRecordCount, onQuickR
               {/* Last Record */}
               <p className="text-xs text-muted-foreground">
                 {hasRecordedToday 
-                  ? `今日已记 ${todayCount} 次` 
-                  : `上次：${lastRecord ? formatRelativeTime(lastRecord.createdAt) : '–'}`
+                  ? `${todayCount} check-in${todayCount === 1 ? '' : 's'} today`
+                  : `Last: ${lastRecord ? formatRelativeTime(lastRecord.createdAt) : '–'}`
                 }
               </p>
               
@@ -224,19 +224,19 @@ export const EventGrid = ({ events, getLastRecord, getTodayRecordCount, onQuickR
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2">
               <Trash2 className="w-5 h-5 text-destructive" />
-              删除事件
+              Delete habit
             </AlertDialogTitle>
             <AlertDialogDescription>
-              确定要删除「{eventToDelete?.name}」吗？相关的所有记录也会被删除，此操作无法撤销。
+              Delete “{eventToDelete?.name}”? Its full check-in history will also be removed. This cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel onClick={handleCancelDelete}>取消</AlertDialogCancel>
+            <AlertDialogCancel onClick={handleCancelDelete}>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleConfirmDelete}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              删除
+              Delete
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

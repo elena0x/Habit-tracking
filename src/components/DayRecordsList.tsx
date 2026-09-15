@@ -24,7 +24,7 @@ export const DayRecordsList = ({ date, records, events }: DayRecordsListProps) =
   if (records.length === 0) {
     return (
       <div className="text-center py-8 text-muted-foreground">
-        <p>这一天没有记录</p>
+        <p>No check-ins on this day</p>
       </div>
     );
   }
