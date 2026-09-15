@@ -24,7 +24,7 @@ export const CalendarView = ({ records, events, onDateSelect, selectedDate }: Ca
     return eachDayOfInterval({ start: calendarStart, end: calendarEnd });
   }, [currentMonth]);
 
-  const weekDays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+  const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
   
   const recordsByDate = useMemo(() => {
     const map: { [date: string]: EventRecord[] } = {};
@@ -67,7 +67,7 @@ export const CalendarView = ({ records, events, onDateSelect, selectedDate }: Ca
           onClick={() => setCurrentMonth(new Date())}
           className="px-3 py-1 text-sm rounded-full hover:bg-muted transition-colors"
         >
-          今天
+          Today
         </button>
       </div>
 
@@ -99,6 +99,7 @@ export const CalendarView = ({ records, events, onDateSelect, selectedDate }: Ca
             return (
               <button
                 key={dateStr}
+                aria-label={`${isToday ? 'Today, ' : ''}${dateStr}${dayRecords.length ? `, ${dayRecords.length} check-ins` : ''}`}
                 onClick={() => onDateSelect(dateStr)}
                 className={cn(
                   'min-h-[72px] p-1 flex flex-col items-center border-b border-r border-border/50 transition-colors',
@@ -112,7 +113,7 @@ export const CalendarView = ({ records, events, onDateSelect, selectedDate }: Ca
                   !isToday && isCurrentMonth && 'text-foreground',
                   !isToday && !isCurrentMonth && 'text-muted-foreground'
                 )}>
-                  {isToday && isCurrentMonth ? '今' : day.getDate()}
+                  {day.getDate()}
                 </span>
                 
                 {eventColors.length > 0 && (

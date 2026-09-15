@@ -3,7 +3,7 @@ import {
   startOfMonth, endOfMonth, eachDayOfInterval, format, getDay,
   startOfWeek, endOfWeek, startOfYear, eachMonthOfInterval
 } from 'date-fns';
-import { zhCN } from 'date-fns/locale';
+import { enUS } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { getColorClasses, hexToRgba } from '@/lib/colorUtils';
 import { Check, Sun } from 'lucide-react';
@@ -44,7 +44,10 @@ export const HeatmapCard = ({ event, records, currentDate, timeRange }: HeatmapC
   const dotColor = isCustomColor ? '' : presetColorClasses[event.color || 'sky'] || presetColorClasses.sky;
   const iconBg = isCustomColor ? '' : presetIconBgClasses[event.color || 'sky'] || presetIconBgClasses.sky;
   
-  const customDotStyle = isCustomColor ? { backgroundColor: colorInfo.hex } : undefined;
+  const customDotStyle = useMemo(
+    () => isCustomColor ? { backgroundColor: colorInfo.hex } : undefined,
+    [colorInfo.hex, isCustomColor],
+  );
   const customIconBgStyle = isCustomColor ? { backgroundColor: hexToRgba(colorInfo.hex, 0.2) } : undefined;
 
   const recordDates = useMemo(() => {
@@ -66,7 +69,7 @@ export const HeatmapCard = ({ event, records, currentDate, timeRange }: HeatmapC
         {days.map(day => {
           const dateStr = format(day, 'yyyy-MM-dd');
           const hasRecord = recordDates.has(dateStr);
-          const dayLabel = format(day, 'E', { locale: zhCN }).slice(1);
+          const dayLabel = format(day, 'EEEEE', { locale: enUS });
           
           return (
             <div key={dateStr} className="flex flex-col items-center gap-1">
@@ -146,7 +149,7 @@ export const HeatmapCard = ({ event, records, currentDate, timeRange }: HeatmapC
           const monthKey = format(month, 'yyyy-MM');
           const count = recordsByMonth[monthKey] || 0;
           const opacity = count === 0 ? 0.15 : 0.3 + (count / maxMonthRecords) * 0.7;
-          const monthLabel = format(month, 'M月', { locale: zhCN });
+          const monthLabel = format(month, 'MMM', { locale: enUS });
           
           const yearDotStyle = isCustomColor 
             ? { backgroundColor: colorInfo.hex, opacity } 

@@ -30,7 +30,7 @@ export const NumberInput = ({ attribute, value, onChange, error }: AttributeInpu
           type="number"
           value={value as string || ''}
           onChange={(e) => onChange(e.target.value ? parseFloat(e.target.value) : undefined)}
-          placeholder={`请输入${attribute.name}`}
+          placeholder={`Enter ${attribute.name.toLowerCase()}`}
           className={cn(
             "rounded-xl",
             unit && "pr-12",
@@ -59,7 +59,7 @@ export const TextInput = ({ attribute, value, onChange, error }: AttributeInputP
       <Textarea
         value={value as string || ''}
         onChange={(e) => onChange(e.target.value)}
-        placeholder={`请输入${attribute.name}`}
+        placeholder={`Enter ${attribute.name.toLowerCase()}`}
         className={cn(
           "min-h-[80px] resize-none rounded-xl",
           error && "border-destructive"

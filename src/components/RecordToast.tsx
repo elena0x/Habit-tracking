@@ -34,7 +34,7 @@ export const RecordToast = ({ event, onHide }: RecordToastProps) => {
       )}
     >
       <span className="text-lg">{event.icon}</span>
-      <span className="font-medium">已记录 {event.name}</span>
+      <span className="font-medium">Logged {event.name}</span>
     </div>
   );
 };

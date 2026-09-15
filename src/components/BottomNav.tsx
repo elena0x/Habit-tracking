@@ -10,10 +10,10 @@ interface BottomNavProps {
 }
 
 const tabs = [
-  { id: 'home' as TabType, label: '主页', icon: Home },
-  { id: 'stats' as TabType, label: '趋势', icon: BarChart3 },
-  { id: 'calendar' as TabType, label: '查看', icon: Calendar },
-  { id: 'settings' as TabType, label: '设置', icon: Settings },
+  { id: 'home' as TabType, label: 'Home', icon: Home },
+  { id: 'stats' as TabType, label: 'Insights', icon: BarChart3 },
+  { id: 'calendar' as TabType, label: 'Activity', icon: Calendar },
+  { id: 'settings' as TabType, label: 'Settings', icon: Settings },
 ];
 
 export const BottomNav = ({ activeTab, onTabChange }: BottomNavProps) => {

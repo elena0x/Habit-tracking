@@ -47,24 +47,24 @@ export const StatsView = ({ records, events }: StatsViewProps) => {
       <div className="grid grid-cols-3 gap-4">
         <div className="bg-card rounded-2xl p-5 text-center shadow-soft">
           <p className="text-3xl font-semibold text-primary">{stats.totalEvents}</p>
-          <p className="text-sm text-muted-foreground mt-1">个事件</p>
+          <p className="text-sm text-muted-foreground mt-1">habits</p>
         </div>
         <div className="bg-card rounded-2xl p-5 text-center shadow-soft">
           <p className="text-3xl font-semibold text-primary">{stats.totalRecords}</p>
-          <p className="text-sm text-muted-foreground mt-1">次记录</p>
+          <p className="text-sm text-muted-foreground mt-1">check-ins</p>
         </div>
         <div className="bg-card rounded-2xl p-5 text-center shadow-soft">
           <p className="text-3xl font-semibold text-primary">{stats.activeDays}</p>
-          <p className="text-sm text-muted-foreground mt-1">天使用</p>
+          <p className="text-sm text-muted-foreground mt-1">days tracked</p>
         </div>
       </div>
 
       {/* Event Distribution */}
       <div>
-        <h3 className="text-sm font-medium text-muted-foreground mb-4">事件分布</h3>
+        <h3 className="text-sm font-medium text-muted-foreground mb-4">Check-ins by habit</h3>
         {stats.eventStats.length === 0 ? (
           <p className="text-center text-muted-foreground py-8">
-            还没有任何记录
+            No check-ins yet
           </p>
         ) : (
           <div className="space-y-3">
@@ -74,7 +74,7 @@ export const StatsView = ({ records, events }: StatsViewProps) => {
                 <div className="flex-1">
                   <div className="flex justify-between text-sm mb-1">
                     <span className="font-medium">{event.name}</span>
-                    <span className="text-muted-foreground">{count} 次</span>
+                    <span className="text-muted-foreground">{count} check-ins</span>
                   </div>
                   <div className="h-2 bg-muted rounded-full overflow-hidden">
                     <div 
@@ -92,7 +92,7 @@ export const StatsView = ({ records, events }: StatsViewProps) => {
       {/* Motivational Quote */}
       <div className="bg-accent/50 rounded-2xl p-6 text-center">
         <p className="text-muted-foreground italic">
-          "记录下来的时光，就不会悄悄溜走"
+          “Small check-ins make meaningful patterns visible.”
         </p>
       </div>
     </div>

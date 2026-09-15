@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HabitFlow social preview</title>
+    <style>
+      * { box-sizing: border-box; }
+      html, body { margin: 0; width: 100%; height: 100%; overflow: hidden; }
+      body {
+        font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        color: #252329;
+        background:
+          radial-gradient(circle at 14% 12%, rgba(250, 204, 21, .16), transparent 28%),
+          radial-gradient(circle at 88% 80%, rgba(129, 140, 248, .16), transparent 30%),
+          #faf9f7;
+      }
+      .canvas {
+        width: 100vw;
+        height: 100vh;
+        display: grid;
+        grid-template-columns: 57% 43%;
+        align-items: center;
+        padding: 58px 74px;
+        position: relative;
+      }
+      .canvas::after {
+        content: "";
+        position: absolute;
+        inset: 28px;
+        border: 1px solid rgba(37, 35, 41, .07);
+        border-radius: 34px;
+        pointer-events: none;
+      }
+      .brand { display: flex; align-items: center; gap: 18px; margin-bottom: 34px; }
+      .brand img { width: 66px; height: 66px; border-radius: 18px; box-shadow: 0 12px 30px rgba(37, 35, 41, .12); }
+      .brand span { font-size: 30px; font-weight: 700; letter-spacing: -.03em; }
+      h1 { margin: 0; max-width: 640px; font-size: 70px; line-height: 1.02; letter-spacing: -.055em; }
+      .accent { color: #7c6ee6; }
+      p { max-width: 590px; margin: 28px 0 34px; color: #716e78; font-size: 24px; line-height: 1.45; }
+      .chips { display: flex; flex-wrap: wrap; gap: 10px; }
+      .chip { padding: 10px 15px; border: 1px solid #e7e3dd; border-radius: 999px; background: rgba(255,255,255,.72); font-size: 16px; font-weight: 600; }
+      .phones { height: 100%; position: relative; display: flex; align-items: center; justify-content: center; }
+      .phone {
+        position: absolute;
+        width: 236px;
+        height: 512px;
+        border: 9px solid #28262c;
+        border-radius: 38px;
+        overflow: hidden;
+        background: white;
+        box-shadow: 0 32px 70px rgba(37, 35, 41, .18);
+      }
+      .phone img { width: 100%; height: 100%; object-fit: cover; object-position: top; display: block; }
+      .phone.home { transform: translate(-108px, 28px) rotate(-5deg); }
+      .phone.insights { transform: translate(104px, -18px) rotate(5deg); }
+      .eyebrow { margin-bottom: 18px; color: #a86821; font-size: 17px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
+    </style>
+  </head>
+  <body>
+    <main class="canvas">
+      <section>
+        <div class="brand">
+          <img src="../public/app-icon.png" alt="" />
+          <span>HabitFlow</span>
+        </div>
+        <div class="eyebrow">Local-first · Cross-platform</div>
+        <h1>Track what<br /><span class="accent">shapes your life.</span></h1>
+        <p>Flexible habits, frictionless check-ins, and meaningful progress insights—without an account.</p>
+        <div class="chips">
+          <span class="chip">React + TypeScript</span>
+          <span class="chip">iOS + Android</span>
+          <span class="chip">Private by default</span>
+        </div>
+      </section>
+      <section class="phones" aria-label="HabitFlow product screenshots">
+        <div class="phone home"><img src="./assets/habitflow-home-mobile.png" alt="HabitFlow home" /></div>
+        <div class="phone insights"><img src="./assets/habitflow-insights-mobile.png" alt="HabitFlow insights" /></div>
+      </section>
+    </main>
+  </body>
+</html>

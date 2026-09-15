@@ -1,5 +1,5 @@
 import { format, parseISO } from 'date-fns';
-import { zhCN } from 'date-fns/locale';
+import { enUS } from 'date-fns/locale';
 import type { EventRecord, Event } from '@/types';
 import { useMemo } from 'react';
 import { cn } from '@/lib/utils';
@@ -65,8 +65,8 @@ export const TimelineRecords = ({ date, records, events, showAllDates = false }:
     });
 
     const parsedDate = parseISO(sectionDate);
-    const weekDay = format(parsedDate, 'EEEE', { locale: zhCN });
-    const displayDate = format(parsedDate, 'yyyy年 MM月dd日', { locale: zhCN });
+    const weekDay = format(parsedDate, 'EEEE', { locale: enUS });
+    const displayDate = format(parsedDate, 'MMMM d, yyyy', { locale: enUS });
 
     return (
       <div key={sectionDate} className="bg-muted/30 rounded-2xl p-4">
@@ -80,7 +80,7 @@ export const TimelineRecords = ({ date, records, events, showAllDates = false }:
         {/* Timeline */}
         {sortedRecords.length === 0 ? (
           <p className="text-sm text-muted-foreground text-center py-4">
-            这一天没有记录
+            No check-ins on this day
           </p>
         ) : (
           <div className="relative">
@@ -166,7 +166,7 @@ export const TimelineRecords = ({ date, records, events, showAllDates = false }:
     return (
       <div className="bg-muted/30 rounded-2xl p-4 animate-fade-in">
         <p className="text-sm text-muted-foreground text-center py-4">
-          暂无记录
+          No activity yet
         </p>
       </div>
     );

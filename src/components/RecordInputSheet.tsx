@@ -56,9 +56,9 @@ export const RecordInputSheet = ({
       if (attr.required) {
         const value = attributeValues[attr.id];
         if (value === undefined || value === null || value === '') {
-          newErrors[attr.id] = `请填写${attr.name}`;
+          newErrors[attr.id] = `${attr.name} is required`;
         } else if (Array.isArray(value) && value.length === 0) {
-          newErrors[attr.id] = `请选择${attr.name}`;
+          newErrors[attr.id] = `Choose at least one ${attr.name.toLowerCase()} option`;
         }
       }
     });
@@ -107,14 +107,14 @@ export const RecordInputSheet = ({
               onClick={handleCancel}
               className="text-muted-foreground text-base"
             >
-              取消
+              Cancel
             </button>
-            <SheetTitle className="text-lg font-semibold">记录</SheetTitle>
+            <SheetTitle className="text-lg font-semibold">New check-in</SheetTitle>
             <button 
               onClick={handleConfirm}
               className="text-base font-medium text-primary"
             >
-              确定
+              Save
             </button>
           </div>
         </SheetHeader>
@@ -152,9 +152,9 @@ export const RecordInputSheet = ({
 
             {/* Note input */}
             <div className="space-y-1.5">
-              <label className="text-sm font-medium">备注</label>
+              <label className="text-sm font-medium">Note</label>
               <Textarea
-                placeholder="记录一些内容... (可选)"
+                placeholder="Add context... (optional)"
                 value={note}
                 onChange={(e) => setNote(e.target.value.slice(0, 500))}
                 className="min-h-[80px] resize-none rounded-xl border-muted focus-visible:ring-primary"
@@ -172,7 +172,7 @@ export const RecordInputSheet = ({
             className="w-full h-12 rounded-xl text-base font-medium"
           >
             <Pencil className="w-4 h-4 mr-2" />
-            记录
+            Save check-in
           </Button>
         </div>
       </SheetContent>

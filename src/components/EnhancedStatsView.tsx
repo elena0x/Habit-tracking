@@ -6,7 +6,7 @@ import {
   startOfYear, endOfYear, addYears, subYears,
   eachDayOfInterval, eachMonthOfInterval
 } from 'date-fns';
-import { zhCN } from 'date-fns/locale';
+import { enUS } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { HeatmapCard } from './HeatmapCard';
 import type { EventRecord, Event } from '@/types';
@@ -61,11 +61,11 @@ export const EnhancedStatsView = ({ records, events }: EnhancedStatsViewProps) =
     if (timeRange === 'week') {
       const weekStart = startOfWeek(currentDate, { weekStartsOn: 1 });
       const weekEnd = endOfWeek(currentDate, { weekStartsOn: 1 });
-      return `${format(weekStart, 'MM/dd', { locale: zhCN })} - ${format(weekEnd, 'MM/dd', { locale: zhCN })}`;
+      return `${format(weekStart, 'MMM d', { locale: enUS })} – ${format(weekEnd, 'MMM d', { locale: enUS })}`;
     } else if (timeRange === 'month') {
-      return format(currentDate, 'yyyy年 MM月', { locale: zhCN });
+      return format(currentDate, 'MMMM yyyy', { locale: enUS });
     } else {
-      return format(currentDate, 'yyyy年', { locale: zhCN });
+      return format(currentDate, 'yyyy', { locale: enUS });
     }
   }, [timeRange, currentDate]);
 
@@ -112,27 +112,27 @@ export const EnhancedStatsView = ({ records, events }: EnhancedStatsViewProps) =
       <div className="grid grid-cols-2 gap-3">
         <div className="bg-card rounded-2xl p-4 shadow-soft">
           <p className="text-2xl font-semibold text-foreground">
-            {stats.totalEvents} <span className="text-base font-normal text-muted-foreground">个</span>
+            {stats.totalEvents}
           </p>
-          <p className="text-sm text-muted-foreground">事件总数</p>
+          <p className="text-sm text-muted-foreground">Habits</p>
         </div>
         <div className="bg-card rounded-2xl p-4 shadow-soft">
           <p className="text-2xl font-semibold text-foreground">
-            {stats.totalRecords} <span className="text-base font-normal text-muted-foreground">次</span>
+            {stats.totalRecords}
           </p>
-          <p className="text-sm text-muted-foreground">记录次数</p>
+          <p className="text-sm text-muted-foreground">Check-ins</p>
         </div>
         <div className="bg-card rounded-2xl p-4 shadow-soft">
           <p className="text-2xl font-semibold text-foreground">
-            {stats.usageDays} <span className="text-base font-normal text-muted-foreground">天</span>
+            {stats.usageDays} <span className="text-base font-normal text-muted-foreground">days</span>
           </p>
-          <p className="text-sm text-muted-foreground">使用天数</p>
+          <p className="text-sm text-muted-foreground">Days tracked</p>
         </div>
         <div className="bg-card rounded-2xl p-4 shadow-soft">
           <p className="text-2xl font-semibold text-foreground">
-            {stats.recordDays} <span className="text-base font-normal text-muted-foreground">天</span>
+            {stats.recordDays} <span className="text-base font-normal text-muted-foreground">days</span>
           </p>
-          <p className="text-sm text-muted-foreground">记录天数</p>
+          <p className="text-sm text-muted-foreground">Active days</p>
         </div>
       </div>
 
@@ -149,9 +149,9 @@ export const EnhancedStatsView = ({ records, events }: EnhancedStatsViewProps) =
                 : 'text-muted-foreground hover:text-foreground'
             )}
           >
-            {range === 'week' && '周'}
-            {range === 'month' && '月'}
-            {range === 'year' && '年'}
+            {range === 'week' && 'Week'}
+            {range === 'month' && 'Month'}
+            {range === 'year' && 'Year'}
           </button>
         ))}
       </div>
@@ -178,7 +178,7 @@ export const EnhancedStatsView = ({ records, events }: EnhancedStatsViewProps) =
       {/* Event Heatmaps */}
       {events.length === 0 ? (
         <p className="text-center text-muted-foreground py-8">
-          还没有任何事件
+          Create a habit to unlock your insights
         </p>
       ) : (
         <div className={cn(

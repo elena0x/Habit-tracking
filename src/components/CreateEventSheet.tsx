@@ -32,16 +32,16 @@ interface CreateEventSheetProps {
 }
 
 const TYPE_OPTIONS: { value: EventType; label: string }[] = [
-  { value: 'daily', label: '日常' },
-  { value: 'once', label: '一次性' },
-  { value: 'log', label: '记录' },
+  { value: 'daily', label: 'Repeatable' },
+  { value: 'once', label: 'One-time' },
+  { value: 'log', label: 'Detailed log' },
 ];
 
 type ViewMode = 'templates' | 'form';
 
 export const CreateEventSheet = ({ open, onOpenChange, onSubmit }: CreateEventSheetProps) => {
   const [viewMode, setViewMode] = useState<ViewMode>('templates');
-  const [selectedCategory, setSelectedCategory] = useState('所有');
+  const [selectedCategory, setSelectedCategory] = useState('All');
   
   // Form state
   const [name, setName] = useState('');
@@ -87,7 +87,7 @@ export const CreateEventSheet = ({ open, onOpenChange, onSubmit }: CreateEventSh
 
   const resetForm = () => {
     setViewMode('templates');
-    setSelectedCategory('所有');
+    setSelectedCategory('All');
     setName('');
     setType('daily');
     setIcon('📝');
@@ -136,16 +136,16 @@ export const CreateEventSheet = ({ open, onOpenChange, onSubmit }: CreateEventSh
                     onClick={() => handleOpenChange(false)}
                     className="text-muted-foreground text-base"
                   >
-                    取消
+                    Cancel
                   </button>
-                  <SheetTitle className="text-lg font-semibold">新建事件</SheetTitle>
+                  <SheetTitle className="text-lg font-semibold">Create a habit</SheetTitle>
                   <div className="w-10" />
                 </div>
               </SheetHeader>
 
               <div className="flex-1 overflow-y-auto px-6">
                 <p className="text-sm text-muted-foreground mb-4">
-                  没有想法？从选取一些预设事件开始吧
+                  Start from a thoughtfully configured template.
                 </p>
                 
                 <EventTemplates
@@ -159,7 +159,7 @@ export const CreateEventSheet = ({ open, onOpenChange, onSubmit }: CreateEventSh
                     onClick={() => setViewMode('form')}
                     className="w-full h-12 rounded-xl text-base font-medium"
                   >
-                    自定义事件
+                    Create from scratch
                   </Button>
                 </div>
               </div>
@@ -172,9 +172,9 @@ export const CreateEventSheet = ({ open, onOpenChange, onSubmit }: CreateEventSh
                     onClick={() => handleOpenChange(false)}
                     className="text-muted-foreground text-base"
                   >
-                    取消
+                    Cancel
                   </button>
-                  <SheetTitle className="text-lg font-semibold">新建事件</SheetTitle>
+                  <SheetTitle className="text-lg font-semibold">Create a habit</SheetTitle>
                   <button 
                     onClick={handleSubmit}
                     disabled={!name.trim()}
@@ -183,7 +183,7 @@ export const CreateEventSheet = ({ open, onOpenChange, onSubmit }: CreateEventSh
                       name.trim() ? "text-primary" : "text-muted-foreground"
                     )}
                   >
-                    新建
+                    Create
                   </button>
                 </div>
               </SheetHeader>
@@ -204,7 +204,7 @@ export const CreateEventSheet = ({ open, onOpenChange, onSubmit }: CreateEventSh
                   <Input
                     value={name}
                     onChange={(e) => setName(e.target.value.slice(0, 50))}
-                    placeholder="事件名称"
+                    placeholder="Habit name"
                     className="h-14 text-lg rounded-xl border-border/50 bg-muted/30 flex-1"
                     maxLength={50}
                   />
@@ -212,7 +212,7 @@ export const CreateEventSheet = ({ open, onOpenChange, onSubmit }: CreateEventSh
 
                 {/* Basic Settings Section */}
                 <div className="px-6 py-2">
-                  <h3 className="text-sm font-medium text-foreground mb-2">基本</h3>
+                  <h3 className="text-sm font-medium text-foreground mb-2">Basics</h3>
                   <div className="bg-muted/30 rounded-2xl overflow-hidden">
                     {/* Event Type */}
                     <button
@@ -220,14 +220,14 @@ export const CreateEventSheet = ({ open, onOpenChange, onSubmit }: CreateEventSh
                       className="w-full flex items-center justify-between p-4 hover:bg-muted/50 transition-colors"
                     >
                       <div className="flex items-center gap-2">
-                        <span className="text-foreground">事件类型</span>
+                        <span className="text-foreground">Tracking type</span>
                         <TooltipProvider>
                           <Tooltip>
                             <TooltipTrigger asChild>
                               <Info className="w-4 h-4 text-muted-foreground" />
                             </TooltipTrigger>
                             <TooltipContent>
-                              <p>日常：可重复打卡<br/>一次性：只记录一次<br/>记录：需填写内容</p>
+                              <p>Repeatable: check in anytime<br/>One-time: capture a single event<br/>Detailed log: add context and fields</p>
                             </TooltipContent>
                           </Tooltip>
                         </TooltipProvider>
@@ -243,14 +243,14 @@ export const CreateEventSheet = ({ open, onOpenChange, onSubmit }: CreateEventSh
                     {/* Quick Record */}
                     <div className="w-full flex items-center justify-between p-4">
                       <div className="flex items-center gap-2">
-                        <span className="text-foreground">快速记录</span>
+                        <span className="text-foreground">Quick check-in</span>
                         <TooltipProvider>
                           <Tooltip>
                             <TooltipTrigger asChild>
                               <Info className="w-4 h-4 text-muted-foreground" />
                             </TooltipTrigger>
                             <TooltipContent>
-                              <p>开启后，点击图标立即记录</p>
+                              <p>Tap the icon to check in instantly</p>
                             </TooltipContent>
                           </Tooltip>
                         </TooltipProvider>
@@ -273,14 +273,14 @@ export const CreateEventSheet = ({ open, onOpenChange, onSubmit }: CreateEventSh
                 {!quickRecord && (
                   <div className="px-6 py-4">
                     <div className="flex items-center gap-2 mb-2">
-                      <h3 className="text-sm font-medium text-foreground">属性</h3>
+                      <h3 className="text-sm font-medium text-foreground">Custom fields</h3>
                       <TooltipProvider>
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <Info className="w-4 h-4 text-muted-foreground" />
                           </TooltipTrigger>
                           <TooltipContent>
-                            <p>添加自定义字段，记录时可填写</p>
+                            <p>Capture structured details with each check-in</p>
                           </TooltipContent>
                         </Tooltip>
                       </TooltipProvider>
@@ -313,7 +313,7 @@ export const CreateEventSheet = ({ open, onOpenChange, onSubmit }: CreateEventSh
                         className="w-full flex items-center justify-center gap-2 p-4 text-primary hover:bg-muted/50 transition-colors"
                       >
                         <Plus className="w-4 h-4" />
-                        <span>新增</span>
+                        <span>Add field</span>
                       </button>
                     </div>
                   </div>
@@ -325,7 +325,7 @@ export const CreateEventSheet = ({ open, onOpenChange, onSubmit }: CreateEventSh
                     onClick={() => setViewMode('templates')}
                     className="text-sm text-muted-foreground hover:text-foreground"
                   >
-                    ← 返回预设模版
+                    ← Back to templates
                   </button>
                 </div>
               </div>
@@ -343,9 +343,9 @@ export const CreateEventSheet = ({ open, onOpenChange, onSubmit }: CreateEventSh
                 onClick={() => setTypePickerOpen(false)}
                 className="text-muted-foreground text-base"
               >
-                取消
+                Cancel
               </button>
-              <SheetTitle className="text-lg font-semibold">选择事件类型</SheetTitle>
+              <SheetTitle className="text-lg font-semibold">Choose a tracking type</SheetTitle>
               <div className="w-10" />
             </div>
           </SheetHeader>
@@ -369,9 +369,9 @@ export const CreateEventSheet = ({ open, onOpenChange, onSubmit }: CreateEventSh
                   'text-sm mt-0.5',
                   type === t.value ? 'text-primary-foreground/80' : 'text-muted-foreground'
                 )}>
-                  {t.value === 'daily' && '可重复打卡'}
-                  {t.value === 'once' && '发生一次的事'}
-                  {t.value === 'log' && '需要填写内容'}
+                  {t.value === 'daily' && 'Check in as often as you like'}
+                  {t.value === 'once' && 'Capture something that happens once'}
+                  {t.value === 'log' && 'Add notes and structured details'}
                 </div>
               </button>
             ))}

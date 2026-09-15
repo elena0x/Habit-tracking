@@ -1,8 +1,8 @@
 import { useState, useMemo, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, TrendingUp, Calendar, Clock, FileText, Pencil } from 'lucide-react';
-import { format, parseISO, startOfMonth, eachDayOfInterval, subMonths } from 'date-fns';
-import { zhCN } from 'date-fns/locale';
+import { format, parseISO, startOfMonth, eachDayOfInterval, subMonths, subWeeks } from 'date-fns';
+import { enUS } from 'date-fns/locale';
 import { useEvents } from '@/hooks/useEvents';
 import { useRecords } from '@/hooks/useRecords';
 import { EditEventSheet } from '@/components/EditEventSheet';
@@ -46,7 +46,10 @@ const EventDetailPage = () => {
   }, [navigate]);
 
   const event = eventId ? getEventById(eventId) : null;
-  const eventRecords = eventId ? getRecordsByEvent(eventId) : [];
+  const eventRecords = useMemo(
+    () => eventId ? getRecordsByEvent(eventId) : [],
+    [eventId, getRecordsByEvent],
+  );
 
   const handleUpdateEvent = (id: string, data: { name: string; type: EventType; icon: string; color: string }) => {
     updateEvent(id, data);
@@ -71,7 +74,7 @@ const EventDetailPage = () => {
     const uniqueDays = new Set(eventRecords.map(r => r.date));
     
     // Calculate average per week (last 4 weeks)
-    const fourWeeksAgo = subMonths(now, 1);
+    const fourWeeksAgo = subWeeks(now, 4);
     const recentRecords = eventRecords.filter(r => parseISO(r.date) >= fourWeeksAgo);
     const avgPerWeek = Math.round((recentRecords.length / 4) * 10) / 10;
 
@@ -105,7 +108,7 @@ const EventDetailPage = () => {
   if (!event) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <p className="text-muted-foreground">事件不存在</p>
+        <p className="text-muted-foreground">Habit not found</p>
       </div>
     );
   }
@@ -124,14 +127,16 @@ const EventDetailPage = () => {
       {/* Header */}
       <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-lg border-b border-border/50">
         <div className="max-w-lg mx-auto px-5 py-4 flex items-center gap-3">
-          <button 
+          <button
+            aria-label="Go back"
             onClick={() => navigate('/')}
             className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-muted"
           >
             <ArrowLeft className="w-5 h-5" />
           </button>
-          <h1 className="text-xl font-semibold flex-1">事件详情</h1>
-          <button 
+          <h1 className="text-xl font-semibold flex-1">Habit details</h1>
+          <button
+            aria-label="Edit habit"
             onClick={() => setEditSheetOpen(true)}
             className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-muted"
           >
@@ -156,9 +161,9 @@ const EventDetailPage = () => {
             <div className="flex-1">
               <h2 className="text-xl font-semibold">{event.name}</h2>
               <p className="text-sm text-muted-foreground mt-1">
-                {event.type === 'once' && '一次性事件'}
-                {event.type === 'daily' && '日常打卡'}
-                {event.type === 'log' && '内容记录'}
+                {event.type === 'once' && 'One-time event'}
+                {event.type === 'daily' && 'Repeatable habit'}
+                {event.type === 'log' && 'Detailed log'}
               </p>
             </div>
           </div>
@@ -169,28 +174,28 @@ const EventDetailPage = () => {
           <div className="bg-muted/30 rounded-2xl p-4">
             <div className="flex items-center gap-2 text-muted-foreground mb-2">
               <TrendingUp className="w-4 h-4" />
-              <span className="text-xs">总记录</span>
+              <span className="text-xs">Total check-ins</span>
             </div>
             <p className="text-2xl font-semibold">{stats.total}</p>
           </div>
           <div className="bg-muted/30 rounded-2xl p-4">
             <div className="flex items-center gap-2 text-muted-foreground mb-2">
               <Calendar className="w-4 h-4" />
-              <span className="text-xs">本月</span>
+              <span className="text-xs">This month</span>
             </div>
             <p className="text-2xl font-semibold">{stats.thisMonth}</p>
           </div>
           <div className="bg-muted/30 rounded-2xl p-4">
             <div className="flex items-center gap-2 text-muted-foreground mb-2">
               <Clock className="w-4 h-4" />
-              <span className="text-xs">活跃天数</span>
+              <span className="text-xs">Active days</span>
             </div>
             <p className="text-2xl font-semibold">{stats.activeDays}</p>
           </div>
           <div className="bg-muted/30 rounded-2xl p-4">
             <div className="flex items-center gap-2 text-muted-foreground mb-2">
               <TrendingUp className="w-4 h-4" />
-              <span className="text-xs">周均</span>
+              <span className="text-xs">Weekly average</span>
             </div>
             <p className="text-2xl font-semibold">{stats.avgPerWeek}</p>
           </div>
@@ -198,7 +203,7 @@ const EventDetailPage = () => {
 
         {/* Mini Heatmap */}
         <div className="bg-muted/30 rounded-2xl p-4">
-          <h3 className="text-sm font-medium mb-3">活动热力图</h3>
+          <h3 className="text-sm font-medium mb-3">Activity heatmap</h3>
           <div className="flex flex-wrap gap-1">
             {heatmapData.slice(-42).map((day, index) => {
               const opacity = day.count === 0 ? 0.1 : 0.3 + (day.count / maxCount) * 0.7;
@@ -210,24 +215,24 @@ const EventDetailPage = () => {
                   key={index}
                   className={cn('w-4 h-4 rounded-sm', !isCustomColor && colors.accent)}
                   style={heatmapStyle}
-                  title={`${day.date}: ${day.count}次`}
+                  title={`${day.date}: ${day.count} check-in${day.count === 1 ? '' : 's'}`}
                 />
               );
             })}
           </div>
-          <p className="text-xs text-muted-foreground mt-2">最近6周</p>
+          <p className="text-xs text-muted-foreground mt-2">Last 6 weeks</p>
         </div>
 
         {/* Records Timeline */}
         <div className="bg-muted/30 rounded-2xl p-4">
           <h3 className="text-sm font-medium mb-4 flex items-center gap-2">
             <FileText className="w-4 h-4" />
-            历史记录
+            Check-in history
           </h3>
           
           {sortedRecords.length === 0 ? (
             <p className="text-sm text-muted-foreground text-center py-4">
-              还没有记录
+              No check-ins yet
             </p>
           ) : (
             <div className="relative max-h-[400px] overflow-y-auto" style={{ paddingLeft: '20px' }}>
@@ -237,8 +242,8 @@ const EventDetailPage = () => {
               <div className="space-y-4">
               {sortedRecords.slice(0, 50).map((record) => {
                 const recordDate = parseISO(record.date);
-                const displayDate = format(recordDate, 'MM月dd日', { locale: zhCN });
-                const weekDay = format(recordDate, 'EEEE', { locale: zhCN });
+                const displayDate = format(recordDate, 'MMM d', { locale: enUS });
+                const weekDay = format(recordDate, 'EEEE', { locale: enUS });
                 
                 return (
                   <div key={record.id} className="relative">
@@ -268,7 +273,7 @@ const EventDetailPage = () => {
               
               {sortedRecords.length > 50 && (
                 <p className="text-xs text-muted-foreground text-center py-2">
-                  仅显示最近50条记录
+                  Showing the 50 most recent check-ins
                 </p>
               )}
               </div>

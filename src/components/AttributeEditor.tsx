@@ -16,13 +16,13 @@ interface AttributeEditorProps {
 }
 
 const TYPE_NAMES: Record<AttributeType, string> = {
-  number: '数值',
-  single_select: '单选',
-  multi_select: '多选',
-  text: '文本',
-  toggle: '开关',
-  rating: '评分',
-  time: '时间',
+  number: 'number',
+  single_select: 'single-select',
+  multi_select: 'multi-select',
+  text: 'text',
+  toggle: 'yes/no',
+  rating: 'rating',
+  time: 'time',
 };
 
 export const AttributeEditor = ({ 
@@ -83,10 +83,10 @@ export const AttributeEditor = ({
               onClick={() => onOpenChange(false)}
               className="text-muted-foreground text-base"
             >
-              取消
+              Cancel
             </button>
             <SheetTitle className="text-lg font-semibold">
-              添加{TYPE_NAMES[type]}属性
+              Add a {TYPE_NAMES[type]} field
             </SheetTitle>
             <div className="w-10" />
           </div>
@@ -95,11 +95,11 @@ export const AttributeEditor = ({
         <div className="space-y-6">
           {/* Attribute Name */}
           <div className="space-y-2">
-            <label className="text-sm font-medium text-muted-foreground">属性名称</label>
+            <label className="text-sm font-medium text-muted-foreground">Field name</label>
             <Input
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="例如：金额、心情、地点..."
+              placeholder="For example: mood, distance, location..."
               className="h-12 text-base rounded-xl"
             />
           </div>
@@ -107,8 +107,8 @@ export const AttributeEditor = ({
           {/* Required Toggle */}
           <div className="flex items-center justify-between py-2">
             <div>
-              <span className="text-sm font-medium text-foreground">必填</span>
-              <p className="text-xs text-muted-foreground mt-0.5">记录时必须填写此属性</p>
+              <span className="text-sm font-medium text-foreground">Required</span>
+              <p className="text-xs text-muted-foreground mt-0.5">Ask for this field on every check-in</p>
             </div>
             <Switch
               checked={required}
@@ -119,7 +119,7 @@ export const AttributeEditor = ({
           {/* Options for select types */}
           {needsOptions && (
             <div className="space-y-3">
-              <label className="text-sm font-medium text-muted-foreground">选项列表</label>
+              <label className="text-sm font-medium text-muted-foreground">Options</label>
               
               {/* Existing options */}
               <div className="space-y-2">
@@ -144,7 +144,7 @@ export const AttributeEditor = ({
                 <Input
                   value={newOption}
                   onChange={(e) => setNewOption(e.target.value)}
-                  placeholder="输入选项名称"
+                  placeholder="Enter an option"
                   className="h-10 rounded-xl flex-1"
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
@@ -172,7 +172,7 @@ export const AttributeEditor = ({
             disabled={!canSave}
             className="w-full h-12 rounded-xl text-base font-medium"
           >
-            保存属性
+            Save field
           </Button>
         </div>
       </SheetContent>
